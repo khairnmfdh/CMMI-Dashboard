@@ -1,0 +1,126 @@
+.artifacts {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #FAFAFB;
+  min-height: 100%;
+}
+
+.toolRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.toolPill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #E4E7EC;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #101828;
+  cursor: pointer;
+}
+
+.toolPill:hover {
+  background: #F2F4F7;
+}
+
+.toolIcon {
+  font-size: 15px;
+}
+
+.filterRow {
+  display: flex;
+  gap: 10px;
+}
+
+.searchInput {
+  flex: 1;
+  max-width: 320px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid #E4E7EC;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+}
+
+.projectGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.projectGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.projectGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.projectLogo {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+  flex-shrink: 0;
+  padding: 4px;
+}
+
+.projectGroupName {
+  font-size: 20px;
+  font-weight: 800;
+  color: #101828;
+}
+
+.projectGroupMeta {
+  font-size: 13px;
+  color: #667085;
+}
+
+.artifactGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+
+.artifactCard {
+  background: #B9CDFF;
+  border-radius: 14px;
+  padding: 20px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1D3A8A;
+  min-height: 76px;
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.artifactCard:hover {
+  background: #A3BCFA;
+}
+
+@media (max-width: 1400px) {
+  .artifactGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
