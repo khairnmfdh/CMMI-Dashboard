@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
+import axios from "axios";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend,
@@ -20,76 +21,6 @@ const monthOptions = [
   { value: 2, label: "February 2025" },
   { value: 1, label: "January 2025" },
 ];
-
-function makeMonthData(base) {
-  return {
-    1: base[0], 2: base[1], 3: base[2], 4: base[3], 5: base[4], 6: base[5],
-  };
-}
-
-const PROCESS_DATA = {
-  "peer-review": {
-    title: "Peer Review",
-    monthData: makeMonthData([
-      { staging: 18, prod: 4, total: 22 },
-      { staging: 21, prod: 3, total: 24 },
-      { staging: 15, prod: 6, total: 21 },
-      { staging: 26, prod: 5, total: 31 },
-      { staging: 23, prod: 4, total: 27 },
-      { staging: 25, prod: 2, total: 27 },
-    ]),
-    issues: [
-      { id: "PR-101", title: "Missing reviewer sign-off on release branch", project: "Mobile App", tribe: "Platform", created: "2025-06-02", closed: "2025-06-08", status: "Done", month: 6, env: "staging" },
-      { id: "PR-102", title: "Review checklist skipped for hotfix", project: "Checkout", tribe: "Commerce", created: "2025-06-03", closed: "", status: "In Progress", month: 6, env: "production" },
-      { id: "PR-103", title: "Peer review comments unresolved before merge", project: "Discovery", tribe: "Commerce", created: "2025-06-05", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "PR-104", title: "Review turnaround exceeded SLA", project: "Notifications", tribe: "Platform", created: "2025-06-07", closed: "2025-06-12", status: "Done", month: 6, env: "staging" },
-      { id: "PR-105", title: "No secondary reviewer assigned", project: "Analytics UI", tribe: "Data", created: "2025-06-08", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "PR-106", title: "Review record missing in tracker", project: "Reports", tribe: "Data", created: "2025-06-09", closed: "", status: "In Progress", month: 6, env: "production" },
-      { id: "PR-107", title: "Conflicting review approvals", project: "Mobile App", tribe: "Platform", created: "2025-06-10", closed: "2025-06-15", status: "Done", month: 6, env: "staging" },
-      { id: "PR-108", title: "Review bypassed via admin merge", project: "Checkout", tribe: "Commerce", created: "2025-06-11", closed: "", status: "In Progress", month: 6, env: "production" },
-    ],
-  },
-  sqa: {
-    title: "Software Quality Assurance (SQA)",
-    monthData: makeMonthData([
-      { staging: 28, prod: 7, total: 35 },
-      { staging: 31, prod: 5, total: 36 },
-      { staging: 22, prod: 9, total: 31 },
-      { staging: 40, prod: 8, total: 48 },
-      { staging: 35, prod: 6, total: 41 },
-      { staging: 38, prod: 4, total: 42 },
-    ]),
-    issues: [
-      { id: "ISS-001", title: "Login page crashes on iOS 17", project: "Mobile App", tribe: "Platform", created: "2025-06-02", closed: "2025-06-10", status: "Done", month: 6, env: "staging" },
-      { id: "ISS-002", title: "Cart total rounding error", project: "Checkout", tribe: "Commerce", created: "2025-06-03", closed: "", status: "In Progress", month: 6, env: "production" },
-      { id: "ISS-003", title: "Search returns empty on filter", project: "Discovery", tribe: "Commerce", created: "2025-06-05", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "ISS-004", title: "Notification push delay >5min", project: "Notifications", tribe: "Platform", created: "2025-06-07", closed: "2025-06-12", status: "Done", month: 6, env: "staging" },
-      { id: "ISS-005", title: "Dashboard chart misaligned", project: "Analytics UI", tribe: "Data", created: "2025-06-08", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "ISS-006", title: "Export CSV corrupts UTF-8", project: "Reports", tribe: "Data", created: "2025-06-09", closed: "", status: "In Progress", month: 6, env: "production" },
-      { id: "ISS-007", title: "Profile photo upload fails >5MB", project: "Mobile App", tribe: "Platform", created: "2025-06-10", closed: "2025-06-15", status: "Done", month: 6, env: "staging" },
-      { id: "ISS-008", title: "Payment gateway timeout 30s", project: "Checkout", tribe: "Commerce", created: "2025-06-11", closed: "", status: "In Progress", month: 6, env: "production" },
-    ],
-  },
-  vv: {
-    title: "Validation and Verification (V&V)",
-    monthData: makeMonthData([
-      { staging: 12, prod: 2, total: 14 },
-      { staging: 15, prod: 3, total: 18 },
-      { staging: 10, prod: 4, total: 14 },
-      { staging: 19, prod: 3, total: 22 },
-      { staging: 17, prod: 2, total: 19 },
-      { staging: 20, prod: 1, total: 21 },
-    ]),
-    issues: [
-      { id: "VV-201", title: "Test case fails on regression suite", project: "Mobile App", tribe: "Platform", created: "2025-06-02", closed: "2025-06-09", status: "Done", month: 6, env: "staging" },
-      { id: "VV-202", title: "Validation script skipped in pipeline", project: "Checkout", tribe: "Commerce", created: "2025-06-04", closed: "", status: "In Progress", month: 6, env: "production" },
-      { id: "VV-203", title: "Coverage below threshold on module", project: "Discovery", tribe: "Commerce", created: "2025-06-05", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "VV-204", title: "Verification evidence not attached", project: "Notifications", tribe: "Platform", created: "2025-06-07", closed: "2025-06-13", status: "Done", month: 6, env: "staging" },
-      { id: "VV-205", title: "Test environment mismatch", project: "Analytics UI", tribe: "Data", created: "2025-06-08", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "VV-206", title: "Validation sign-off pending", project: "Reports", tribe: "Data", created: "2025-06-09", closed: "", status: "In Progress", month: 6, env: "production" },
-    ],
-  },
-};
 
 function StatusPill({ status }) {
   const cls =
@@ -229,12 +160,31 @@ export const ProcessArea = ({ initialTab = "sqa" }) => {
   const [month, setMonth] = useState(6);
   const [view, setView] = useState("tribe");
   const [openGroups, setOpenGroups] = useState(new Set());
+  
+  const [processData, setProcessData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const data = PROCESS_DATA[activeTab];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/api/v1/process-areas/tasks");
+        setProcessData(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch process area data", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const data = processData ? processData[activeTab] : null;
 
   const chartData = useMemo(() => {
+    if (!data) return [];
     return MONTHS.map((label, i) => {
       const m = data.monthData[i + 1];
+      if (!m) return { month: label, Detection: 0, Leakage: 0, Staging: 0, Production: 0 };
       return {
         month: label,
         Detection: +((m.staging / m.total) * 100).toFixed(1),
@@ -245,7 +195,10 @@ export const ProcessArea = ({ initialTab = "sqa" }) => {
     });
   }, [data]);
 
-  const current = data.monthData[month];
+  if (loading) return <div style={{ padding: 40, color: "white" }}>Loading Process Areas...</div>;
+  if (!processData || !data) return <div style={{ padding: 40, color: "white" }}>Failed to load data.</div>;
+
+  const current = data.monthData[month] || { staging: 0, prod: 0, total: 1 }; // fallback to avoid NaN
   const detectPct = ((current.staging / current.total) * 100).toFixed(1);
   const leakPct = ((current.prod / current.total) * 100).toFixed(1);
   const monthRows = data.issues.filter((i) => i.month === month);

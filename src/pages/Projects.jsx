@@ -1,61 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from "recharts";
 import { Select } from "@legion-ui-kit/react-core";
 import styles from "../Projects.module.css";
-
-const projects = [
-  {
-    id: "netmonk",
-    name: "NETMONK",
-    team: "Team User123",
-    status: "Active",
-    level: "Level 3 - Defined",
-    peerReview: 78,
-    pqa: 78,
-    vv: 78,
-    overall: 40,
-    detail: {
-      peerReview: { reviewsConducted: 6, openFindings: 4, closeFindings: 11, practicesMet: "PR.1.1, PR.1.2, PR.2.1" },
-      pqa: { auditsCompleted: 6, nonCompliancesFound: 6, processAdherence: "86%", lastAudit: "2026-06-10" },
-      vv: { verificationPassed: "36/40", validationPassed: "16/40", testCoverage: "76%" },
-    },
-  },
-  {
-    id: "padi-umkm",
-    name: "PaDi UMKM",
-    team: "Team User123",
-    status: "Active",
-    level: "Level 3 - Defined",
-    peerReview: 78,
-    pqa: 78,
-    vv: 78,
-    overall: 71,
-    detail: {
-      peerReview: { reviewsConducted: 8, openFindings: 2, closeFindings: 14, practicesMet: "PR.1.1, PR.1.2, PR.2.1" },
-      pqa: { auditsCompleted: 7, nonCompliancesFound: 3, processAdherence: "90%", lastAudit: "2026-06-12" },
-      vv: { verificationPassed: "38/40", validationPassed: "22/40", testCoverage: "84%" },
-    },
-  },
-  {
-    id: "legion-ai",
-    name: "Legion AI",
-    team: "Team User123",
-    status: "Active",
-    level: "Level 3 - Defined",
-    peerReview: 78,
-    pqa: 78,
-    vv: 78,
-    overall: 82,
-    detail: {
-      peerReview: { reviewsConducted: 9, openFindings: 1, closeFindings: 17, practicesMet: "PR.1.1, PR.1.2, PR.2.1" },
-      pqa: { auditsCompleted: 9, nonCompliancesFound: 1, processAdherence: "95%", lastAudit: "2026-06-14" },
-      vv: { verificationPassed: "39/40", validationPassed: "26/40", testCoverage: "91%" },
-    },
-  },
-];
 
 const chartData = [
   { name: "Netmonk", "Peer Review": 13000, "Process QA": 11000, "V&V": 20000 },
@@ -76,7 +26,73 @@ export const Projects = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [level, setLevel] = useState("all");
-  const [selectedId, setSelectedId] = useState(projects[0].id);
+  const [projects, setProjects] = useState([]);
+  const [metrics, setMetrics] = useState(null);
+  const [selectedId, setSelectedId] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/api/v1/projects/cmmi-details");
+        const data = res.data.data;
+        
+        // Combine projects with their breakdowns so the UI works seamlessly
+        const combinedProjects = data.projects.map((p, index) => {
+          // Find matching breakdown, assuming they are in same order for now
+          // In real life, we would match by ID. Here we just map sequentially.
+          const b = data.breakdowns;
+          return {
+            id: p.name.toLowerCase().replace(/ /g, "-"),
+            name: p.name,
+            team: p.team,
+            status: p.status,
+            level: p.level,
+            peerReview: p.pr_score,
+            pqa: p.pqa_score,
+            vv: p.vv_score,
+            overall: p.overall_pct,
+            detail: {
+              peerReview: {
+                reviewsConducted: b[0].details["Reviews conducted"],
+                openFindings: b[0].details["Open findings"],
+                closeFindings: b[0].details["Close findings"],
+                practicesMet: b[0].details["Practices met"]
+              },
+              pqa: {
+                auditsCompleted: b[1].details["Audits completed"],
+                nonCompliancesFound: b[1].details["Non-compliances found"],
+                processAdherence: b[1].details["Process adherence"],
+                lastAudit: b[1].details["Last audit"]
+              },
+              vv: {
+                verificationPassed: b[2].details["Verification passed"],
+                validationPassed: b[2].details["Validation passed"],
+                testCoverage: b[2].details["Test coverage"]
+              }
+            }
+          };
+        });
+
+        setProjects(combinedProjects);
+        setMetrics({
+          total_projects: data.total_projects,
+          avg_pr: data.avg_pr_score,
+          avg_pqa: data.avg_pqa_score,
+          avg_vv: data.avg_vv_score
+        });
+        setSelectedId(combinedProjects[0].id);
+      } catch (err) {
+        console.error("Failed to fetch projects", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  if (loading) return <div style={{ padding: 40, color: "white" }}>Loading Projects...</div>;
+  if (!projects.length) return <div style={{ padding: 40, color: "white" }}>Failed to load data.</div>;
 
   const selected = projects.find((p) => p.id === selectedId);
   const radarData = [
@@ -84,8 +100,6 @@ export const Projects = () => {
     { axis: "PQA", value: selected.pqa },
     { axis: "VV", value: selected.vv },
   ];
-
-  const avg = (key) => Math.round(projects.reduce((sum, p) => sum + p[key], 0) / projects.length);
 
   const filteredProjects = projects.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
@@ -96,22 +110,22 @@ export const Projects = () => {
       <div className={styles.statsRow}>
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Total Projects</div>
-          <div className={styles.statValue}>{projects.length}</div>
+          <div className={styles.statValue}>{metrics.total_projects}</div>
           <div className={styles.statSub}>Overall CMMI Score · Level 3</div>
         </div>
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Avg Peer Review</div>
-          <div className={styles.statValue}>{avg("peerReview")}%</div>
+          <div className={styles.statValue}>{metrics.avg_pr}%</div>
           <div className={styles.statSub}>39/50 practices met</div>
         </div>
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Avg PQA Score</div>
-          <div className={styles.statValue}>{avg("pqa")}%</div>
+          <div className={styles.statValue}>{metrics.avg_pqa}%</div>
           <div className={styles.statSub}>39/50 practices met</div>
         </div>
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Avg V&V Score</div>
-          <div className={styles.statValue}>{avg("vv")}%</div>
+          <div className={styles.statValue}>{metrics.avg_vv}%</div>
           <div className={styles.statSub}>39/50 practices met</div>
         </div>
       </div>

@@ -1,136 +1,90 @@
-import { useState } from "react";
-import { Select } from "@legion-ui-kit/react-core";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Button, Select } from "@legion-ui-kit/react-core";
 import styles from "../Artifacts.module.css";
-
-const tools = [
-  { key: "gitlab", label: "Gitlab", icon: "🦊" },
-  { key: "radar", label: "Radar", icon: "📡" },
-  { key: "taiga", label: "Taiga", icon: "🏃" },
-  { key: "wiki", label: "WiKi", icon: "📖" },
-  { key: "jenkins", label: "Jenkins", icon: "⚙️" },
-  { key: "scc", label: "SCC", icon: "📄" },
-  { key: "sonarqube", label: "SonarQube", icon: "🛡️" },
-];
-
-const projects = [
-  {
-    id: "netmonk",
-    name: "NETMONK",
-    initials: "NETMONK",
-    color: "#0A2540",
-    count: 7,
-    tools: 5,
-    updated: "terhubung ke 5 tools · terakhir diperbarui 2 jam lalu",
-    artifacts: [
-      "Sprint Velocity Tracker",
-      "Backlog Issue #231",
-      "MR!47 - Auth-refactor",
-      "Build #88 - main branch",
-      "Quality Gate Report v2.4",
-      "Architecture Overview",
-      "SCC Report - Q2 2025",
-    ],
-  },
-  {
-    id: "padi-umkm",
-    name: "PaDi UMKM",
-    initials: "UMKM",
-    color: "#0F9D8C",
-    count: 5,
-    tools: 5,
-    updated: "terhubung ke 5 tools · terakhir diperbarui 2 jam lalu",
-    artifacts: [
-      "Sprint Velocity Tracker",
-      "Backlog Issue #231",
-      "MR!47 - Auth-refactor",
-      "Build #88 - main branch",
-      "Quality Gate Report v2.4",
-    ],
-  },
-  {
-    id: "legion-ai",
-    name: "Legion AI",
-    initials: "Legion",
-    color: "#7C3AED",
-    count: 5,
-    tools: 5,
-    updated: "terhubung ke 5 tools · terakhir diperbarui 2 jam lalu",
-    artifacts: [
-      "Sprint Velocity Tracker",
-      "Backlog Issue #231",
-      "MR!47 - Auth-refactor",
-      "Build #88 - main branch",
-      "Quality Gate Report v2.4",
-    ],
-  },
-];
 
 const projectOptions = [
   { label: "All Projects", value: "all" },
-  ...projects.map((p) => ({ label: p.name, value: p.id })),
+  { label: "Netmonk", value: "netmonk" },
+  { label: "PaDi UMKM", value: "padi" },
+  { label: "Legion AI", value: "legion" },
 ];
 
 export const Artifacts = () => {
   const [search, setSearch] = useState("");
-  const [projectFilter, setProjectFilter] = useState("all");
+  const [filterProject, setFilterProject] = useState("all");
+  const [projectsData, setProjectsData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredProjects = projects
-    .filter((p) => projectFilter === "all" || p.id === projectFilter)
-    .map((p) => ({
-      ...p,
-      artifacts: p.artifacts.filter((a) =>
-        a.toLowerCase().includes(search.toLowerCase())
-      ),
-    }))
-    .filter((p) => p.artifacts.length > 0 || search === "");
+  useEffect(() => {
+    const fetchArtifacts = async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/api/v1/artifacts/list");
+        setProjectsData(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch artifacts", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchArtifacts();
+  }, []);
+
+  if (loading) return <div style={{ padding: 40, color: "white" }}>Loading Artifacts...</div>;
+  if (!projectsData.length) return <div style={{ padding: 40, color: "white" }}>Failed to load data.</div>;
+
+  const filteredProjects = projectsData.filter((p) => {
+    if (filterProject !== "all" && !p.id.includes(filterProject)) return false;
+    if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
 
   return (
     <div className={styles.artifacts}>
-      <div className={styles.toolRow}>
-        {tools.map((tool) => (
-          <button key={tool.key} className={styles.toolPill}>
-            <span className={styles.toolIcon}>{tool.icon}</span>
-            {tool.label}
-          </button>
-        ))}
+      <div className={styles.topToolbar}>
+        <div className={styles.toolList}>
+          <Button variant="ghost" className={styles.toolBtn}>🦊 Gitlab</Button>
+          <Button variant="ghost" className={styles.toolBtn}>📡 Radar</Button>
+          <Button variant="ghost" className={styles.toolBtn}>🏃 Taiga</Button>
+          <Button variant="ghost" className={styles.toolBtn}>📖 WiKi</Button>
+          <Button variant="ghost" className={styles.toolBtn}>⚙️ Jenkins</Button>
+          <Button variant="ghost" className={styles.toolBtn}>📄 SCC</Button>
+          <Button variant="ghost" className={styles.toolBtn}>🛡️ SonarQube</Button>
+        </div>
       </div>
 
-      <div className={styles.filterRow}>
+      <div className={styles.filterBar}>
         <input
           className={styles.searchInput}
           placeholder="Search Artifacts....."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <Select
-          options={projectOptions}
-          value={projectFilter}
-          onChange={(value) => setProjectFilter(value)}
-        />
+        <Select options={projectOptions} value={filterProject} onChange={setFilterProject} />
       </div>
 
-      <div className={styles.projectGroups}>
-        {filteredProjects.map((project) => (
-          <div key={project.id} className={styles.projectGroup}>
-            <div className={styles.projectGroupHeader}>
+      <div className={styles.projectList}>
+        {filteredProjects.map((p) => (
+          <div key={p.id} className={styles.projectRow}>
+            <div className={styles.projectHeader}>
               <div
-                className={styles.projectLogo}
-                style={{ background: project.color }}
+                className={styles.projectIcon}
+                style={{ background: p.color }}
               >
-                {project.initials}
+                {p.initials}
               </div>
-              <div>
-                <div className={styles.projectGroupName}>{project.name}</div>
-                <div className={styles.projectGroupMeta}>
-                  {project.count} artifacts · {project.updated}
-                </div>
+              <div className={styles.projectInfo}>
+                <h3 className={styles.projectName}>{p.name}</h3>
+                <p className={styles.projectMeta}>
+                  {p.count} artifacts · {p.updated}
+                </p>
               </div>
             </div>
 
             <div className={styles.artifactGrid}>
-              {project.artifacts.map((artifact) => (
-                <div key={artifact} className={styles.artifactCard}>
-                  {artifact}
+              {p.artifacts.map((art, idx) => (
+                <div key={idx} className={styles.artifactCard}>
+                  {art}
                 </div>
               ))}
             </div>

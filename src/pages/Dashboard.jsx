@@ -1,37 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { Card, Text, ProgressBar, Divider, Select } from "@legion-ui-kit/react-core";
 import styles from "../Dashboard.module.css";
-
-const statCards = [
-  { label: "Overall CMMI Score", value: "77%", sub: "Overall CMMI Score · Level 3" },
-  { label: "Peer Review", value: "78%", sub: "39/50 practices met" },
-  { label: "Process QA", value: "82%", sub: "39/50 practices met" },
-  { label: "Verification & Validation", value: "71%", sub: "39/50 practices met" },
-];
-
-const assessmentProgress = [
-  { label: "Verification & Validation (VV)", pct: 88 },
-  { label: "Peer Review (PR)", pct: 74 },
-  { label: "Process Quality Assurance (PQA)", pct: 78 },
-];
-
-const upcomingReviews = [
-  { day: "14", month: "JUL", label: "VV Verification Audit" },
-  { day: "18", month: "JUL", label: "PQA Quarterly Review" },
-  { day: "22", month: "JUL", label: "PR Quarterly Review" },
-  { day: "24", month: "JUL", label: "PR Verification Audit" },
-];
-
-const recentActivities = Array.from({ length: 6 }).map(() => ({
-  time: "Today · 09:42",
-  text: "User123 approved evidence for PQA - 2.3",
-}));
-
-const chartGroups = [
-  { name: "Netmonk", approved: 17500, pending: 9500, rejected: 10500 },
-  { name: "PaDi UMKM", approved: 8000, pending: 13000, rejected: 18500 },
-  { name: "Legion AI", approved: 6500, pending: 20000, rejected: 15500 },
-];
 
 const processAreaOptions = [
   { label: "All Process Area", value: "all" },
@@ -42,7 +12,61 @@ const processAreaOptions = [
 
 export const Dashboard = () => {
   const [selectedArea, setSelectedArea] = useState("all");
+  const [data, setData] = useState(null);
+  const [chartGroups, setChartGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const maxChartVal = 25000;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [summaryRes, chartRes] = await Promise.all([
+          axios.get("http://localhost:8080/api/v1/dashboard/cmmi-summary"),
+          axios.get("http://localhost:8080/api/v1/artifacts/review-progress")
+        ]);
+        setData(summaryRes.data.data);
+        setChartGroups(chartRes.data.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) return <div style={{ padding: 40, color: "white" }}>Loading Dashboard...</div>;
+  if (!data) return <div style={{ padding: 40, color: "white" }}>Failed to load data.</div>;
+
+  // Map API response to UI structures
+  const statCards = [
+    { label: "Overall CMMI Score", value: `${data.overall_score}%`, sub: `Overall CMMI Score · Level ${data.overall_level}` },
+    ...data.process_areas.map(pa => ({
+      label: pa.name.split(' (')[0], // e.g. "Peer Review"
+      value: `${pa.score}%`,
+      sub: `${pa.met}/${pa.total} practices met`
+    }))
+  ];
+
+  const assessmentProgress = data.process_areas.map(pa => ({
+    label: pa.name,
+    pct: pa.score
+  }));
+
+  const upcomingReviews = data.upcoming_schedules.map(sch => {
+    const parts = sch.date.split(" ");
+    return {
+      day: parts[0],
+      month: parts[1] || "",
+      label: sch.title
+    };
+  });
+
+  const recentActivities = data.recent_activities.map(act => ({
+    time: act.time,
+    text: act.description
+  }));
 
   return (
     <div className={styles.dashboard}>
@@ -137,7 +161,7 @@ export const Dashboard = () => {
 
             <div className={styles.chartBody}>
               {chartGroups.map((group) => (
-                <div key={group.name} className={styles.chartGroup}>
+                <div key={group.tribe} className={styles.chartGroup}>
                   <div className={styles.chartBars}>
                     <div
                       className={`${styles.chartBar} ${styles.chartBarRejected}`}
@@ -152,7 +176,7 @@ export const Dashboard = () => {
                       style={{ height: `${(group.approved / maxChartVal) * 100}%` }}
                     />
                   </div>
-                  <Text as="span" className={styles.chartGroupLabel}>{group.name}</Text>
+                  <Text as="span" className={styles.chartGroupLabel}>{group.tribe}</Text>
                 </div>
               ))}
             </div>
