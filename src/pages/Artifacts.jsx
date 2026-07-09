@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Select } from "@legion-ui-kit/react-core";
+import { Chip, Avatar, Card, Text, Select } from "@legion-ui-kit/react-core";
 import styles from "../Artifacts.module.css";
 
 const tools = [
@@ -16,51 +16,35 @@ const projects = [
   {
     id: "netmonk",
     name: "NETMONK",
-    initials: "NETMONK",
-    color: "#0A2540",
+    initials: "NM",
     count: 7,
-    tools: 5,
     updated: "terhubung ke 5 tools · terakhir diperbarui 2 jam lalu",
     artifacts: [
-      "Sprint Velocity Tracker",
-      "Backlog Issue #231",
-      "MR!47 - Auth-refactor",
-      "Build #88 - main branch",
-      "Quality Gate Report v2.4",
-      "Architecture Overview",
-      "SCC Report - Q2 2025",
+      "Sprint Velocity Tracker", "Backlog Issue #231", "MR!47 - Auth-refactor",
+      "Build #88 - main branch", "Quality Gate Report v2.4",
+      "Architecture Overview", "SCC Report - Q2 2025",
     ],
   },
   {
     id: "padi-umkm",
     name: "PaDi UMKM",
-    initials: "UMKM",
-    color: "#0F9D8C",
+    initials: "PU",
     count: 5,
-    tools: 5,
     updated: "terhubung ke 5 tools · terakhir diperbarui 2 jam lalu",
     artifacts: [
-      "Sprint Velocity Tracker",
-      "Backlog Issue #231",
-      "MR!47 - Auth-refactor",
-      "Build #88 - main branch",
-      "Quality Gate Report v2.4",
+      "Sprint Velocity Tracker", "Backlog Issue #231", "MR!47 - Auth-refactor",
+      "Build #88 - main branch", "Quality Gate Report v2.4",
     ],
   },
   {
     id: "legion-ai",
     name: "Legion AI",
-    initials: "Legion",
-    color: "#7C3AED",
+    initials: "LA",
     count: 5,
-    tools: 5,
     updated: "terhubung ke 5 tools · terakhir diperbarui 2 jam lalu",
     artifacts: [
-      "Sprint Velocity Tracker",
-      "Backlog Issue #231",
-      "MR!47 - Auth-refactor",
-      "Build #88 - main branch",
-      "Quality Gate Report v2.4",
+      "Sprint Velocity Tracker", "Backlog Issue #231", "MR!47 - Auth-refactor",
+      "Build #88 - main branch", "Quality Gate Report v2.4",
     ],
   },
 ];
@@ -73,6 +57,15 @@ const projectOptions = [
 export const Artifacts = () => {
   const [search, setSearch] = useState("");
   const [projectFilter, setProjectFilter] = useState("all");
+  const [activeTools, setActiveTools] = useState(new Set());
+
+  const toggleTool = (key) => {
+    setActiveTools((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  };
 
   const filteredProjects = projects
     .filter((p) => projectFilter === "all" || p.id === projectFilter)
@@ -88,10 +81,17 @@ export const Artifacts = () => {
     <div className={styles.artifacts}>
       <div className={styles.toolRow}>
         {tools.map((tool) => (
-          <button key={tool.key} className={styles.toolPill}>
+          <Chip
+            key={tool.key}
+            color="primary"
+            variant={activeTools.has(tool.key) ? "solid" : "outline"}
+            hoverable
+            className={styles.toolChip}
+            onClick={() => toggleTool(tool.key)}
+          >
             <span className={styles.toolIcon}>{tool.icon}</span>
             {tool.label}
-          </button>
+          </Chip>
         ))}
       </div>
 
@@ -105,7 +105,9 @@ export const Artifacts = () => {
         <Select
           options={projectOptions}
           value={projectFilter}
-          onChange={(value) => setProjectFilter(value)}
+          onChange={setProjectFilter}
+          inputWrapperClassName={styles.filterSelectWrapper}
+          inputClassName={styles.filterSelectInput}
         />
       </div>
 
@@ -113,25 +115,27 @@ export const Artifacts = () => {
         {filteredProjects.map((project) => (
           <div key={project.id} className={styles.projectGroup}>
             <div className={styles.projectGroupHeader}>
-              <div
-                className={styles.projectLogo}
-                style={{ background: project.color }}
-              >
+              <Avatar size="lg" className={styles.projectAvatar}>
                 {project.initials}
-              </div>
+              </Avatar>
               <div>
-                <div className={styles.projectGroupName}>{project.name}</div>
-                <div className={styles.projectGroupMeta}>
+                <Text as="h3" className={styles.projectGroupName}>{project.name}</Text>
+                <Text as="p" color="tertiary" className={styles.projectGroupMeta}>
                   {project.count} artifacts · {project.updated}
-                </div>
+                </Text>
               </div>
             </div>
 
             <div className={styles.artifactGrid}>
               {project.artifacts.map((artifact) => (
-                <div key={artifact} className={styles.artifactCard}>
-                  {artifact}
-                </div>
+                <Card
+                  key={artifact}
+                  bordered={false}
+                  elevation="none"
+                  className={styles.artifactCard}
+                >
+                  <Text as="p" className={styles.artifactLabel}>{artifact}</Text>
+                </Card>
               ))}
             </div>
           </div>

@@ -14,8 +14,6 @@
 
 /* Purple pill wrapper around Legion's Select */
 
-
-
 .processSelect {
   display: inline-flex;
 }
@@ -37,7 +35,6 @@
   font-size: 14px !important;
   cursor: pointer;
 }
-
 
 /* Stat cards */
 .statsRow {
@@ -99,7 +96,7 @@
   text-decoration: none;
 }
 
-/* Mid grid: progress + schedule */
+/* Mid grid: product process area + PIID result */
 .midGrid {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -124,53 +121,61 @@
   color: #101828;
 }
 
-.scheduleList {
+/* PIID Result */
+.piidList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
 }
 
-.scheduleItem {
+.piidItem {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
-.scheduleDateBadge {
-  background: #101828;
-  color: #fff;
+.piidBadge {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
   border-radius: 10px;
-  padding: 6px 10px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  min-width: 48px;
-}
-
-.scheduleDay {
+  justify-content: center;
   font-size: 16px;
   font-weight: 800;
-  line-height: 1.1;
   color: #fff;
 }
 
-.scheduleMonth {
-  font-size: 10px;
-  font-weight: 600;
-  opacity: 0.8;
-  color: #fff;
+.piidBadge_achieved {
+  background: #12B76A;
 }
 
-.scheduleLabel {
-  font-size: 14px;
+.piidBadge_partial {
+  background: #F59E0B;
+}
+
+.piidBadge_notAchieved {
+  background: #F04438;
+}
+
+.piidLabel {
+  font-size: 15px;
   font-weight: 600;
   color: #101828;
 }
 
-/* Bottom grid: timeline + chart */
+/* Bottom grid: timeline + charts */
 .bottomGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.bottomRightCol {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
 
@@ -222,7 +227,7 @@
   color: #101828;
 }
 
-/* Chart */
+/* Practice Status Distribution chart */
 .chartWrapper {
   display: flex;
   gap: 12px;
@@ -320,4 +325,99 @@
 
 .legendDotRejected {
   background: #F04438;
+}
+
+/* Total Weakness bar chart */
+.weaknessChartTitle {
+  font-size: 20px;
+  font-weight: 800;
+  color: #101828;
+  margin-bottom: 18px;
+}
+
+.weaknessChartArea {
+  display: flex;
+  gap: 14px;
+}
+
+.weaknessLabels {
+  width: 74px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 18px;
+}
+
+.weaknessRowLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #667085;
+}
+
+.weaknessPlot {
+  flex: 1;
+  position: relative;
+}
+
+.weaknessGridlines {
+  position: absolute;
+  inset: 0;
+}
+
+.weaknessGridline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #C6CEDB;
+}
+
+.weaknessBars {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 18px;
+  height: 100%;
+  min-height: 150px;
+}
+
+.weaknessBarRow {
+  height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.weaknessBarFill {
+  height: 100%;
+  min-width: 4px;
+  border-radius: 3px;
+  background: #4F46E5;
+}
+
+.weaknessAxisRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.weaknessAxisSpacer {
+  width: 74px;
+  flex-shrink: 0;
+}
+
+.weaknessAxisTicksRow {
+  flex: 1;
+  position: relative;
+  height: 16px;
+}
+
+.weaknessAxisTick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #667085;
 }

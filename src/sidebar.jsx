@@ -57,10 +57,10 @@ export default function AppSidebar({ activeLabel, onNavigate }) {
         label: (
           <span className={styles.menuLabel} onClick={() => onNavigate("Projects")}>
             <IconProjects />
-            Projects
+            Products
           </span>
         ),
-        isActive: activeLabel === "Projects",
+        isActive: activeLabel === "Products",
       },
     },
     {

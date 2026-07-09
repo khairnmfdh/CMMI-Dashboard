@@ -3,7 +3,7 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer,
 } from "recharts";
-import { Select } from "@legion-ui-kit/react-core";
+import { Card, CardHeader, CardBody, Text, Select, Button, Table, Badge } from "@legion-ui-kit/react-core";
 import styles from "../Reports.module.css";
 
 const projectOptions = [{ label: "All Projects", value: "all" }];
@@ -43,9 +43,13 @@ const issuesPreview = [
   { id: "SQA-1.1", area: "SQA", project: "LegionAI", title: "Functional  test- logic flow", status: "Done", created: "30.01.2019", closed: "30.01.2019" },
 ];
 
-function StatusPill({ status }) {
-  const cls = status === "Done" ? styles.statusDone : styles.statusInProgress;
-  return <span className={`${styles.statusPill} ${cls}`}>{status}</span>;
+function StatusBadge({ status }) {
+  return (
+    <Badge
+      color={status === "Done" ? "success" : "information"}
+      label={status}
+    />
+  );
 }
 
 export const Reports = () => {
@@ -61,97 +65,121 @@ export const Reports = () => {
     <div className={styles.reports}>
       <div className={styles.filterRow}>
         <div className={styles.filterLeft}>
-          <Select options={projectOptions} value={project} onChange={setProject} />
-          <Select options={areaOptions} value={area} onChange={setArea} />
-          <Select options={monthOptions} value={month} onChange={setMonth} />
+          <Select
+            options={projectOptions}
+            value={project}
+            onChange={setProject}
+            inputWrapperClassName={styles.filterSelectWrapper}
+            inputClassName={styles.filterSelectInput}
+          />
+          <Select
+            options={areaOptions}
+            value={area}
+            onChange={setArea}
+            inputWrapperClassName={styles.filterSelectWrapper}
+            inputClassName={styles.filterSelectInput}
+          />
+          <Select
+            options={monthOptions}
+            value={month}
+            onChange={setMonth}
+            inputWrapperClassName={styles.filterSelectWrapper}
+            inputClassName={styles.filterSelectInput}
+          />
         </div>
 
-        <button className={styles.downloadBtn} onClick={handleDownloadPdf}>
+        <Button color="primary" variant="solid" onClick={handleDownloadPdf}>
           ⬇ Download PDF
-        </button>
+        </Button>
       </div>
 
       <div className={styles.statsRow}>
         {statCards.map((stat) => (
-          <div key={stat.label} className={styles.statCard}>
-            <div className={styles.statLabel}>{stat.label}</div>
-            <div className={styles.statValue}>{stat.value}</div>
-            <div className={styles.statSub}>{stat.sub}</div>
-          </div>
+          <Card key={stat.label} className={styles.statCard} elevation="none">
+            <Text as="p" color="white" className={styles.statLabel}>{stat.label}</Text>
+            <Text as="h2" color="white" className={styles.statValue}>{stat.value}</Text>
+            <Text as="p" color="white" className={styles.statSub}>{stat.sub}</Text>
+          </Card>
         ))}
       </div>
 
       <div className={styles.chartsRow}>
-        <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Monthly Issues - Open vs Closed</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={issuesChartData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-              <YAxis tickFormatter={(v) => `${v / 1000}k`} tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Legend
-                verticalAlign="bottom"
-                iconType="circle"
-                formatter={(value) => <span className={styles.legendLabel}>{value}</span>}
-              />
-              <Bar dataKey="Open" fill="#12B76A" radius={[4, 4, 0, 0]} barSize={26} />
-              <Bar dataKey="Closed" fill="#F04438" radius={[4, 4, 0, 0]} barSize={26} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <Card bordered elevation="elevation-1" className={styles.chartCard}>
+          <CardHeader title="Monthly Issues - Open vs Closed" noDivider />
+          <CardBody>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={issuesChartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                <YAxis tickFormatter={(v) => `${v / 1000}k`} tick={{ fontSize: 12 }} />
+                <Tooltip />
+                <Legend
+                  verticalAlign="bottom"
+                  iconType="circle"
+                  formatter={(value) => <span className={styles.legendLabel}>{value}</span>}
+                />
+                <Bar dataKey="Open" fill="#12B76A" radius={[4, 4, 0, 0]} barSize={26} />
+                <Bar dataKey="Closed" fill="#F04438" radius={[4, 4, 0, 0]} barSize={26} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardBody>
+        </Card>
 
-        <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Monthly Score Trend by Process Area</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={scoreTrendData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(v) => `${v}%`} />
-              <Legend
-                verticalAlign="top"
-                align="right"
-                iconType="plainline"
-                formatter={(value) => <span className={styles.legendLabel}>{value}</span>}
-              />
-              <Line type="monotone" dataKey="PR" stroke="#12B76A" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="PQA" stroke="#875BF7" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="VV" stroke="#F04478" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <Card bordered elevation="elevation-1" className={styles.chartCard}>
+          <CardHeader title="Monthly Score Trend by Process Area" noDivider />
+          <CardBody>
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart data={scoreTrendData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} />
+                <Tooltip formatter={(v) => `${v}%`} />
+                <Legend
+                  verticalAlign="top"
+                  align="right"
+                  iconType="plainline"
+                  formatter={(value) => <span className={styles.legendLabel}>{value}</span>}
+                />
+                <Line type="monotone" dataKey="PR" stroke="#12B76A" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="PQA" stroke="#875BF7" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="VV" stroke="#F04478" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardBody>
+        </Card>
       </div>
 
-      <div className={styles.tablePanel}>
-        <h3 className={styles.tableTitle}>Issues List Preview</h3>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>AREAS</th>
-              <th>PROJECTED</th>
-              <th>TITTLE</th>
-              <th>STATUS</th>
-              <th>CREATED</th>
-              <th>CLOSED</th>
-            </tr>
-          </thead>
-          <tbody>
-            {issuesPreview.map((row) => (
-              <tr key={row.id}>
-                <td className={styles.idCell}>{row.id}</td>
-                <td>{row.area}</td>
-                <td>{row.project}</td>
-                <td>{row.title}</td>
-                <td><StatusPill status={row.status} /></td>
-                <td>{row.created}</td>
-                <td>{row.closed}</td>
+      <Card bordered elevation="elevation-1" className={styles.tablePanel}>
+        <CardHeader title="Issues List Preview" noDivider />
+        <CardBody>
+          <Table borderCell="row" hoverable className={styles.table}>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>AREAS</th>
+                <th>PROJECTED</th>
+                <th>TITTLE</th>
+                <th>STATUS</th>
+                <th>CREATED</th>
+                <th>CLOSED</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {issuesPreview.map((row) => (
+                <tr key={row.id}>
+                  <td className={styles.idCell}>{row.id}</td>
+                  <td>{row.area}</td>
+                  <td>{row.project}</td>
+                  <td>{row.title}</td>
+                  <td><StatusBadge status={row.status} /></td>
+                  <td>{row.created}</td>
+                  <td>{row.closed}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </CardBody>
+      </Card>
     </div>
   );
 };

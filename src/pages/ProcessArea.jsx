@@ -1,8 +1,28 @@
 import { useState, useMemo } from "react";
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
 } from "recharts";
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Text,
+  Select,
+  Button,
+  Table,
+  Badge,
+  TabList,
+  Tab,
+  Accordion,
+} from "@legion-ui-kit/react-core";
 import styles from "../ProcessArea.module.css";
 
 const tabs = [
@@ -23,7 +43,12 @@ const monthOptions = [
 
 function makeMonthData(base) {
   return {
-    1: base[0], 2: base[1], 3: base[2], 4: base[3], 5: base[4], 6: base[5],
+    1: base[0],
+    2: base[1],
+    3: base[2],
+    4: base[3],
+    5: base[4],
+    6: base[5],
   };
 }
 
@@ -39,14 +64,12 @@ const PROCESS_DATA = {
       { staging: 25, prod: 2, total: 27 },
     ]),
     issues: [
-      { id: "PR-101", title: "Missing reviewer sign-off on release branch", project: "Mobile App", tribe: "Platform", created: "2025-06-02", closed: "2025-06-08", status: "Done", month: 6, env: "staging" },
-      { id: "PR-102", title: "Review checklist skipped for hotfix", project: "Checkout", tribe: "Commerce", created: "2025-06-03", closed: "", status: "In Progress", month: 6, env: "production" },
-      { id: "PR-103", title: "Peer review comments unresolved before merge", project: "Discovery", tribe: "Commerce", created: "2025-06-05", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "PR-104", title: "Review turnaround exceeded SLA", project: "Notifications", tribe: "Platform", created: "2025-06-07", closed: "2025-06-12", status: "Done", month: 6, env: "staging" },
-      { id: "PR-105", title: "No secondary reviewer assigned", project: "Analytics UI", tribe: "Data", created: "2025-06-08", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "PR-106", title: "Review record missing in tracker", project: "Reports", tribe: "Data", created: "2025-06-09", closed: "", status: "In Progress", month: 6, env: "production" },
-      { id: "PR-107", title: "Conflicting review approvals", project: "Mobile App", tribe: "Platform", created: "2025-06-10", closed: "2025-06-15", status: "Done", month: 6, env: "staging" },
-      { id: "PR-108", title: "Review bypassed via admin merge", project: "Checkout", tribe: "Commerce", created: "2025-06-11", closed: "", status: "In Progress", month: 6, env: "production" },
+      { id: "PR-101", title: "Missing reviewer sign-off on release branch", project: "Mobile App", tribe: "Platform", created: "2025-06-02", closed: "2025-06-08", status: "Done", month: 6 },
+      { id: "PR-102", title: "Review checklist skipped for hotfix", project: "Checkout", tribe: "Commerce", created: "2025-06-03", closed: "", status: "In Progress", month: 6 },
+      { id: "PR-103", title: "Peer review comments unresolved before merge", project: "Discovery", tribe: "Commerce", created: "2025-06-05", closed: "", status: "To Do", month: 6 },
+      { id: "PR-104", title: "Review turnaround exceeded SLA", project: "Notifications", tribe: "Platform", created: "2025-06-07", closed: "2025-06-12", status: "Done", month: 6 },
+      { id: "PR-105", title: "No secondary reviewer assigned", project: "Analytics UI", tribe: "Data", created: "2025-06-08", closed: "", status: "To Do", month: 6 },
+      { id: "PR-106", title: "Review record missing in tracker", project: "Reports", tribe: "Data", created: "2025-06-09", closed: "", status: "In Progress", month: 6 },
     ],
   },
   sqa: {
@@ -60,14 +83,12 @@ const PROCESS_DATA = {
       { staging: 38, prod: 4, total: 42 },
     ]),
     issues: [
-      { id: "ISS-001", title: "Login page crashes on iOS 17", project: "Mobile App", tribe: "Platform", created: "2025-06-02", closed: "2025-06-10", status: "Done", month: 6, env: "staging" },
-      { id: "ISS-002", title: "Cart total rounding error", project: "Checkout", tribe: "Commerce", created: "2025-06-03", closed: "", status: "In Progress", month: 6, env: "production" },
-      { id: "ISS-003", title: "Search returns empty on filter", project: "Discovery", tribe: "Commerce", created: "2025-06-05", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "ISS-004", title: "Notification push delay >5min", project: "Notifications", tribe: "Platform", created: "2025-06-07", closed: "2025-06-12", status: "Done", month: 6, env: "staging" },
-      { id: "ISS-005", title: "Dashboard chart misaligned", project: "Analytics UI", tribe: "Data", created: "2025-06-08", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "ISS-006", title: "Export CSV corrupts UTF-8", project: "Reports", tribe: "Data", created: "2025-06-09", closed: "", status: "In Progress", month: 6, env: "production" },
-      { id: "ISS-007", title: "Profile photo upload fails >5MB", project: "Mobile App", tribe: "Platform", created: "2025-06-10", closed: "2025-06-15", status: "Done", month: 6, env: "staging" },
-      { id: "ISS-008", title: "Payment gateway timeout 30s", project: "Checkout", tribe: "Commerce", created: "2025-06-11", closed: "", status: "In Progress", month: 6, env: "production" },
+      { id: "ISS-001", title: "Login page crashes on iOS 17", project: "Mobile App", tribe: "Platform", created: "2025-06-02", closed: "2025-06-10", status: "Done", month: 6 },
+      { id: "ISS-002", title: "Cart total rounding error", project: "Checkout", tribe: "Commerce", created: "2025-06-03", closed: "", status: "In Progress", month: 6 },
+      { id: "ISS-003", title: "Search returns empty on filter", project: "Discovery", tribe: "Commerce", created: "2025-06-05", closed: "", status: "To Do", month: 6 },
+      { id: "ISS-004", title: "Notification push delay >5min", project: "Notifications", tribe: "Platform", created: "2025-06-07", closed: "2025-06-12", status: "Done", month: 6 },
+      { id: "ISS-005", title: "Dashboard chart misaligned", project: "Analytics UI", tribe: "Data", created: "2025-06-08", closed: "", status: "To Do", month: 6 },
+      { id: "ISS-006", title: "Export CSV corrupts UTF-8", project: "Reports", tribe: "Data", created: "2025-06-09", closed: "", status: "In Progress", month: 6 },
     ],
   },
   vv: {
@@ -81,30 +102,33 @@ const PROCESS_DATA = {
       { staging: 20, prod: 1, total: 21 },
     ]),
     issues: [
-      { id: "VV-201", title: "Test case fails on regression suite", project: "Mobile App", tribe: "Platform", created: "2025-06-02", closed: "2025-06-09", status: "Done", month: 6, env: "staging" },
-      { id: "VV-202", title: "Validation script skipped in pipeline", project: "Checkout", tribe: "Commerce", created: "2025-06-04", closed: "", status: "In Progress", month: 6, env: "production" },
-      { id: "VV-203", title: "Coverage below threshold on module", project: "Discovery", tribe: "Commerce", created: "2025-06-05", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "VV-204", title: "Verification evidence not attached", project: "Notifications", tribe: "Platform", created: "2025-06-07", closed: "2025-06-13", status: "Done", month: 6, env: "staging" },
-      { id: "VV-205", title: "Test environment mismatch", project: "Analytics UI", tribe: "Data", created: "2025-06-08", closed: "", status: "To Do", month: 6, env: "staging" },
-      { id: "VV-206", title: "Validation sign-off pending", project: "Reports", tribe: "Data", created: "2025-06-09", closed: "", status: "In Progress", month: 6, env: "production" },
+      { id: "VV-201", title: "Test case fails on regression suite", project: "Mobile App", tribe: "Platform", created: "2025-06-02", closed: "2025-06-09", status: "Done", month: 6 },
+      { id: "VV-202", title: "Validation script skipped in pipeline", project: "Checkout", tribe: "Commerce", created: "2025-06-04", closed: "", status: "In Progress", month: 6 },
+      { id: "VV-203", title: "Coverage below threshold on module", project: "Discovery", tribe: "Commerce", created: "2025-06-05", closed: "", status: "To Do", month: 6 },
+      { id: "VV-204", title: "Verification evidence not attached", project: "Notifications", tribe: "Platform", created: "2025-06-07", closed: "2025-06-13", status: "Done", month: 6 },
     ],
   },
 };
 
-function StatusPill({ status }) {
-  const cls =
-    status === "Done" ? styles.statusDone :
-    status === "In Progress" ? styles.statusInProgress :
-    styles.statusTodo;
-  return <span className={`${styles.statusPill} ${cls}`}>{status}</span>;
+function StatusBadge({ status }) {
+  const color =
+    status === "Done"
+      ? "success"
+      : status === "In Progress"
+        ? "information"
+        : "secondary";
+  return <Badge color={color} label={status} />;
 }
 
 function FlatTable({ rows }) {
-  if (!rows.length) {
-    return <p className={styles.emptyText}>No issues this month.</p>;
-  }
+  if (!rows.length)
+    return (
+      <Text as="p" color="tertiary">
+        No issues this month.
+      </Text>
+    );
   return (
-    <table className={styles.table}>
+    <Table borderCell="row" hoverable className={styles.table}>
       <thead>
         <tr>
           <th style={{ width: 80 }}>ID</th>
@@ -113,123 +137,75 @@ function FlatTable({ rows }) {
           <th style={{ width: 90 }}>Tribe</th>
           <th style={{ width: 90 }}>Created</th>
           <th style={{ width: 90 }}>Closed</th>
-          <th style={{ width: 100 }}>Status</th>
+          <th style={{ width: 110 }}>Status</th>
         </tr>
       </thead>
       <tbody>
         {rows.map((r) => (
           <tr key={r.id}>
             <td className={styles.idCell}>{r.id}</td>
-            <td className={styles.titleCell} title={r.title}>{r.title}</td>
+            <td className={styles.titleCell} title={r.title}>
+              {r.title}
+            </td>
             <td>{r.project}</td>
             <td>{r.tribe}</td>
             <td>{r.created}</td>
             <td className={styles.mutedCell}>{r.closed || "—"}</td>
-            <td><StatusPill status={r.status} /></td>
+            <td>
+              <StatusBadge status={r.status} />
+            </td>
           </tr>
         ))}
       </tbody>
-    </table>
+    </Table>
   );
 }
 
-function CollapsibleGroup({ id, icon, label, badge, badgeStyle, count, openGroups, toggleGroup, children }) {
-  const isOpen = openGroups.has(id);
-  return (
-    <div className={styles.tribeGroup}>
-      <div className={styles.tribeHeader} onClick={() => toggleGroup(id)}>
-        <span className={styles.tribeIcon}>{icon}</span>
-        <span className={styles.tribeLabel}>{label}</span>
-        {badge && <span className={styles.tribeBadge} style={badgeStyle}>{badge}</span>}
-        <span className={styles.tribeCountBadge}>{count} issues</span>
-        <span className={`${styles.tribeArrow} ${isOpen ? styles.tribeArrowOpen : ""}`}>›</span>
-      </div>
-      {isOpen && <div className={styles.tribeBody}>{children}</div>}
-    </div>
-  );
-}
-
-function TribeView({ rows, openGroups, toggleGroup }) {
-  const tribes = useMemo(() => {
+function GroupedView({ rows, groupBy, openGroups, toggleGroup }) {
+  const groups = useMemo(() => {
     const map = {};
     rows.forEach((r) => {
-      if (!map[r.tribe]) map[r.tribe] = {};
-      if (!map[r.tribe][r.project]) map[r.tribe][r.project] = [];
-      map[r.tribe][r.project].push(r);
+      const key = r[groupBy];
+      if (!map[key]) map[key] = [];
+      map[key].push(r);
     });
     return map;
-  }, [rows]);
+  }, [rows, groupBy]);
 
   return (
     <>
-      {Object.entries(tribes).map(([tribe, projects]) => {
-        const allRows = Object.values(projects).flat();
-        const id = `tribe_${tribe}`;
-        return (
-          <CollapsibleGroup
-            key={id}
-            id={id}
-            icon="👥"
-            label={tribe}
-            count={allRows.length}
-            openGroups={openGroups}
-            toggleGroup={toggleGroup}
-          >
-            {Object.entries(projects).map(([proj, prows]) => (
-              <div key={proj}>
-                <div className={styles.projectSubHeader}>
-                  📁 {proj} <span className={styles.mutedCell}>({prows.length})</span>
-                </div>
-                <FlatTable rows={prows} />
-              </div>
-            ))}
-          </CollapsibleGroup>
-        );
-      })}
-    </>
-  );
-}
-
-function ProjectView({ rows, openGroups, toggleGroup }) {
-  const projects = useMemo(() => {
-    const map = {};
-    rows.forEach((r) => {
-      if (!map[r.project]) map[r.project] = { tribe: r.tribe, rows: [] };
-      map[r.project].rows.push(r);
-    });
-    return map;
-  }, [rows]);
-
-  return (
-    <>
-      {Object.entries(projects).map(([proj, data]) => {
-        const id = `proj_${proj}`;
-        return (
-          <CollapsibleGroup
-            key={id}
-            id={id}
-            icon="📁"
-            label={proj}
-            badge={data.tribe}
-            badgeStyle={{ background: "#ECFDF3", color: "#12B76A" }}
-            count={data.rows.length}
-            openGroups={openGroups}
-            toggleGroup={toggleGroup}
-          >
-            <FlatTable rows={data.rows} />
-          </CollapsibleGroup>
-        );
-      })}
+      {Object.entries(groups).map(([key, groupRows]) => (
+        <Accordion
+          key={key}
+          isOpen={openGroups.has(key)}
+          onClick={() => toggleGroup(key)}
+          toggleIcon="chevron-arrow"
+          title={
+            <div className={styles.accordionTitle}>
+              <span>
+                {groupBy === "tribe" ? "👥" : "📁"} {key}
+              </span>
+              <Badge color="secondary" label={`${groupRows.length} issues`} />
+            </div>
+          }
+        >
+          <FlatTable rows={groupRows} />
+        </Accordion>
+      ))}
     </>
   );
 }
 
 export const ProcessArea = ({ initialTab = "sqa" }) => {
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const activeIndex = tabs.findIndex((t) => t.key === initialTab);
+  const [tabIndex, setTabIndex] = useState(
+    activeIndex === -1 ? 1 : activeIndex,
+  );
   const [month, setMonth] = useState(6);
   const [view, setView] = useState("tribe");
   const [openGroups, setOpenGroups] = useState(new Set());
 
+  const activeTab = tabs[tabIndex].key;
   const data = PROCESS_DATA[activeTab];
 
   const chartData = useMemo(() => {
@@ -254,14 +230,13 @@ export const ProcessArea = ({ initialTab = "sqa" }) => {
   const toggleGroup = (id) => {
     setOpenGroups((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
   };
 
-  const handleTabChange = (key) => {
-    setActiveTab(key);
+  const handleTabChange = (index) => {
+    setTabIndex(index);
     setMonth(6);
     setView("tribe");
     setOpenGroups(new Set());
@@ -270,131 +245,215 @@ export const ProcessArea = ({ initialTab = "sqa" }) => {
   return (
     <div className={styles.processArea}>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Process Areas</h1>
-        <p className={styles.pageSubtitle}>Monitoring CMMI Process Area</p>
+        <Text as="h1" variant="title">
+          Process Areas
+        </Text>
+        <Text as="p" color="tertiary">
+          Monitoring CMMI Process Area
+        </Text>
       </div>
 
-      <div className={styles.tabPills}>
+      <TabList
+        activeTab={tabIndex}
+        onChange={handleTabChange}
+        className={styles.tabList}
+      >
         {tabs.map((tab) => (
-          <button
+          <Tab
             key={tab.key}
-            className={`${styles.tabPill} ${activeTab === tab.key ? styles.tabPillActive : ""}`}
-            onClick={() => handleTabChange(tab.key)}
+            className={styles.tab}
+            activeClassName={styles.tabActive}
           >
             {tab.label}
-          </button>
+          </Tab>
         ))}
-      </div>
+      </TabList>
 
       <div className={styles.sectionTitleRow}>
         <span className={styles.sectionTitleBar} />
-        <h2 className={styles.sectionTitle}>{data.title}</h2>
+        <Text as="h2" variant="heading">
+          {data.title}
+        </Text>
       </div>
 
       <div className={styles.topBar}>
         <span />
-        <div className={styles.monthSelect}>
-          📅
-          <select
-            className={styles.monthSelectInput}
-            value={month}
-            onChange={(e) => setMonth(Number(e.target.value))}
-          >
-            {monthOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
+        <Select
+          options={monthOptions}
+          value={month}
+          onChange={(v) => setMonth(Number(v))}
+          inputWrapperClassName={styles.monthSelectWrapper}
+          inputClassName={styles.monthSelectInput}
+        />
       </div>
 
       <div className={styles.kpiRow}>
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiLabel}>🐛 Issue detection %</div>
-          <div className={styles.kpiValueDetect}>{detectPct}%</div>
-          <div className={styles.kpiSub}>{current.staging} staging / {current.total} total</div>
-        </div>
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiLabel}>⚠️ Issue leakage %</div>
-          <div className={styles.kpiValueLeak}>{leakPct}%</div>
-          <div className={styles.kpiSub}>{current.prod} production / {current.total} total</div>
-        </div>
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiLabel}>📋 Total defects</div>
-          <div className={styles.kpiValue}>{current.total}</div>
-          <div className={styles.kpiSub}>this month</div>
-        </div>
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiLabel}>🕐 Open issues</div>
-          <div className={styles.kpiValue}>{openCount}</div>
-          <div className={styles.kpiSub}>to do + in progress</div>
-        </div>
+        <Card bordered elevation="none" className={styles.kpiCard}>
+          <Text as="p" className={styles.kpiLabel}>
+            🐛 Issue detection %
+          </Text>
+          <Text as="h2" className={styles.kpiValueDetect}>
+            {detectPct}%
+          </Text>
+          <Text as="p" className={styles.kpiSub}>
+            {current.staging} staging / {current.total} total
+          </Text>
+        </Card>
+        <Card bordered elevation="none" className={styles.kpiCard}>
+          <Text as="p" className={styles.kpiLabel}>
+            ⚠️ Issue leakage %
+          </Text>
+          <Text as="h2" className={styles.kpiValueLeak}>
+            {leakPct}%
+          </Text>
+          <Text as="p" className={styles.kpiSub}>
+            {current.prod} production / {current.total} total
+          </Text>
+        </Card>
+        <Card bordered elevation="none" className={styles.kpiCard}>
+          <Text as="p" className={styles.kpiLabel}>
+            📋 Total defects
+          </Text>
+          <Text as="h2" className={styles.kpiValue}>
+            {current.total}
+          </Text>
+          <Text as="p" className={styles.kpiSub}>
+            this month
+          </Text>
+        </Card>
+        <Card bordered elevation="none" className={styles.kpiCard}>
+          <Text as="p" className={styles.kpiLabel}>
+            🕐 Open issues
+          </Text>
+          <Text as="h2" className={styles.kpiValue}>
+            {openCount}
+          </Text>
+          <Text as="p" className={styles.kpiSub}>
+            to do + in progress
+          </Text>
+        </Card>
       </div>
 
       <div className={styles.chartsRow}>
-        <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Monthly trend — detection vs leakage (%)</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-              <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} domain={[0, 100]} />
-              <Tooltip formatter={(v) => `${v}%`} />
-              <Line type="monotone" dataKey="Detection" stroke="#2970FF" strokeDasharray="6 3" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="Leakage" stroke="#F04438" strokeWidth={2} dot={{ r: 3 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <Card bordered elevation="elevation-1" className={styles.chartCard}>
+          <CardHeader
+            title="Monthly trend — detection vs leakage (%)"
+            noDivider
+          />
+          <CardBody>
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                <YAxis
+                  tickFormatter={(v) => `${v}%`}
+                  tick={{ fontSize: 11 }}
+                  domain={[0, 100]}
+                />
+                <Tooltip formatter={(v) => `${v}%`} />
+                <Line
+                  type="monotone"
+                  dataKey="Detection"
+                  stroke="#2970FF"
+                  strokeDasharray="6 3"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Leakage"
+                  stroke="#F04438"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardBody>
+        </Card>
 
-        <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Defects by month — staging vs production</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Bar dataKey="Staging" fill="#2970FF" radius={[3, 3, 0, 0]} barSize={16} />
-              <Bar dataKey="Production" fill="#F04438" radius={[3, 3, 0, 0]} barSize={16} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <Card bordered elevation="elevation-1" className={styles.chartCard}>
+          <CardHeader
+            title="Defects by month — staging vs production"
+            noDivider
+          />
+          <CardBody>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Bar
+                  dataKey="Staging"
+                  fill="#2970FF"
+                  radius={[3, 3, 0, 0]}
+                  barSize={16}
+                />
+                <Bar
+                  dataKey="Production"
+                  fill="#F04438"
+                  radius={[3, 3, 0, 0]}
+                  barSize={16}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardBody>
+        </Card>
       </div>
 
-      <div className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionHeading}>📋 Issue list</h2>
-          <div className={styles.viewToggle}>
-            <button
-              className={`${styles.vbtn} ${view === "tribe" ? styles.vbtnActive : ""}`}
+      <Card bordered elevation="elevation-1" className={styles.listCard}>
+        <CardHeader title="📋 Issue list" noDivider />
+        <CardBody>
+          <div className={styles.viewToggleRow}>
+            <Button
+              size="sm"
+              variant={view === "tribe" ? "solid" : "outline"}
+              color="primary"
               onClick={() => setView("tribe")}
             >
               By tribe
-            </button>
-            <button
-              className={`${styles.vbtn} ${view === "project" ? styles.vbtnActive : ""}`}
+            </Button>
+            <Button
+              size="sm"
+              variant={view === "project" ? "solid" : "outline"}
+              color="primary"
               onClick={() => setView("project")}
             >
               By project
-            </button>
-            <button
-              className={`${styles.vbtn} ${view === "all" ? styles.vbtnActive : ""}`}
+            </Button>
+            <Button
+              size="sm"
+              variant={view === "all" ? "solid" : "outline"}
+              color="primary"
               onClick={() => setView("all")}
             >
               All
-            </button>
+            </Button>
           </div>
-        </div>
 
-        {monthRows.length === 0 ? (
-          <p className={styles.emptyText}>No issues for this month.</p>
-        ) : view === "tribe" ? (
-          <TribeView rows={monthRows} openGroups={openGroups} toggleGroup={toggleGroup} />
-        ) : view === "project" ? (
-          <ProjectView rows={monthRows} openGroups={openGroups} toggleGroup={toggleGroup} />
-        ) : (
-          <FlatTable rows={monthRows} />
-        )}
-      </div>
+          {monthRows.length === 0 ? (
+            <Text as="p" color="tertiary">
+              No issues for this month.
+            </Text>
+          ) : view === "tribe" ? (
+            <GroupedView
+              rows={monthRows}
+              groupBy="tribe"
+              openGroups={openGroups}
+              toggleGroup={toggleGroup}
+            />
+          ) : view === "project" ? (
+            <GroupedView
+              rows={monthRows}
+              groupBy="project"
+              openGroups={openGroups}
+              toggleGroup={toggleGroup}
+            />
+          ) : (
+            <FlatTable rows={monthRows} />
+          )}
+        </CardBody>
+      </Card>
     </div>
   );
 };

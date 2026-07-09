@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from "recharts";
-import { Select } from "@legion-ui-kit/react-core";
+import { Card, CardHeader, CardBody, Text, Select, Badge, ProgressBar } from "@legion-ui-kit/react-core";
 import styles from "../Projects.module.css";
 
 const projects = [
@@ -63,7 +63,7 @@ const chartData = [
   { name: "Legion AI", "Peer Review": 12500, "Process QA": 20000, "V&V": 8500 },
 ];
 
-const statOptions = [{ label: "All Statuses", value: "all" }];
+const statusOptions = [{ label: "All Statuses", value: "all" }];
 const levelOptions = [{ label: "All CMMI Levels", value: "all" }];
 
 function overallColor(pct) {
@@ -94,26 +94,26 @@ export const Projects = () => {
   return (
     <div className={styles.projects}>
       <div className={styles.statsRow}>
-        <div className={styles.statCard}>
-          <div className={styles.statLabel}>Total Projects</div>
-          <div className={styles.statValue}>{projects.length}</div>
-          <div className={styles.statSub}>Overall CMMI Score · Level 3</div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statLabel}>Avg Peer Review</div>
-          <div className={styles.statValue}>{avg("peerReview")}%</div>
-          <div className={styles.statSub}>39/50 practices met</div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statLabel}>Avg PQA Score</div>
-          <div className={styles.statValue}>{avg("pqa")}%</div>
-          <div className={styles.statSub}>39/50 practices met</div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statLabel}>Avg V&V Score</div>
-          <div className={styles.statValue}>{avg("vv")}%</div>
-          <div className={styles.statSub}>39/50 practices met</div>
-        </div>
+        <Card className={styles.statCard} elevation="none">
+          <Text as="p" color="white" className={styles.statLabel}>Total Projects</Text>
+          <Text as="h2" color="white" className={styles.statValue}>{projects.length}</Text>
+          <Text as="p" color="white" className={styles.statSub}>Overall CMMI Score · Level 3</Text>
+        </Card>
+        <Card className={styles.statCard} elevation="none">
+          <Text as="p" color="white" className={styles.statLabel}>Avg Peer Review</Text>
+          <Text as="h2" color="white" className={styles.statValue}>{avg("peerReview")}%</Text>
+          <Text as="p" color="white" className={styles.statSub}>39/50 practices met</Text>
+        </Card>
+        <Card className={styles.statCard} elevation="none">
+          <Text as="p" color="white" className={styles.statLabel}>Avg PQA Score</Text>
+          <Text as="h2" color="white" className={styles.statValue}>{avg("pqa")}%</Text>
+          <Text as="p" color="white" className={styles.statSub}>39/50 practices met</Text>
+        </Card>
+        <Card className={styles.statCard} elevation="none">
+          <Text as="p" color="white" className={styles.statLabel}>Avg V&V Score</Text>
+          <Text as="h2" color="white" className={styles.statValue}>{avg("vv")}%</Text>
+          <Text as="p" color="white" className={styles.statSub}>39/50 practices met</Text>
+        </Card>
       </div>
 
       <div className={styles.filterRow}>
@@ -123,137 +123,164 @@ export const Projects = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <Select options={statOptions} value={status} onChange={setStatus} />
-        <Select options={levelOptions} value={level} onChange={setLevel} />
+        <Select
+          options={statusOptions}
+          value={status}
+          onChange={setStatus}
+          inputWrapperClassName={styles.filterSelectWrapper}
+          inputClassName={styles.filterSelectInput}
+        />
+        <Select
+          options={levelOptions}
+          value={level}
+          onChange={setLevel}
+          inputWrapperClassName={styles.filterSelectWrapper}
+          inputClassName={styles.filterSelectInput}
+        />
       </div>
 
-      <div className={styles.panel}>
-        <h3 className={styles.panelTitle}>Process area Scores - all projects</h3>
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-            <YAxis tickFormatter={(v) => `${v / 1000}k`} tick={{ fontSize: 12 }} />
-            <Tooltip />
-            <Bar dataKey="Peer Review" fill="#F59E0B" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Process QA" fill="#F04438" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="V&V" fill="#12B76A" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      <Card bordered elevation="elevation-1" className={styles.panel}>
+        <CardHeader title="Process area Scores - all projects" noDivider />
+        <CardBody>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+              <YAxis tickFormatter={(v) => `${v / 1000}k`} tick={{ fontSize: 12 }} />
+              <Tooltip />
+              <Bar dataKey="Peer Review" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Process QA" fill="#F04438" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="V&V" fill="#12B76A" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardBody>
+      </Card>
 
       <div className={styles.mainGrid}>
         <div className={styles.projectList}>
           {filteredProjects.map((p) => (
-            <div
+            <Card
               key={p.id}
+              bordered
+              elevation="none"
               className={`${styles.projectCard} ${selectedId === p.id ? styles.projectCardActive : ""}`}
               onClick={() => setSelectedId(p.id)}
             >
               <div className={styles.projectCardTop}>
                 <div>
-                  <div className={styles.projectName}>{p.name}</div>
-                  <div className={styles.projectTeam}>{p.team}</div>
+                  <Text as="h3" className={styles.projectName}>{p.name}</Text>
+                  <Text as="p" color="tertiary" className={styles.projectTeam}>{p.team}</Text>
                 </div>
                 <div className={styles.projectBadges}>
-                  <span className={styles.badgeActive}>{p.status}</span>
-                  <span className={styles.badgeLevel}>{p.level}</span>
+                  <Badge color="success" label={p.status} />
+                  <Badge color="secondary" label={p.level} />
                 </div>
               </div>
 
               <div className={styles.projectMetrics}>
                 <div className={styles.metricBox}>
-                  <div className={styles.metricLabel}>Peer Review</div>
-                  <div className={styles.metricValue}>{p.peerReview}%</div>
+                  <Text as="p" className={styles.metricLabel}>Peer Review</Text>
+                  <Text as="p" className={styles.metricValue}>{p.peerReview}%</Text>
                 </div>
                 <div className={styles.metricBox}>
-                  <div className={styles.metricLabel}>PQA</div>
-                  <div className={styles.metricValue}>{p.pqa}%</div>
+                  <Text as="p" className={styles.metricLabel}>PQA</Text>
+                  <Text as="p" className={styles.metricValue}>{p.pqa}%</Text>
                 </div>
                 <div className={styles.metricBox}>
-                  <div className={styles.metricLabel}>VV</div>
-                  <div className={styles.metricValue}>{p.vv}%</div>
+                  <Text as="p" className={styles.metricLabel}>VV</Text>
+                  <Text as="p" className={styles.metricValue}>{p.vv}%</Text>
                 </div>
               </div>
 
               <div className={styles.overallRow}>
-                <div className={styles.overallTrack}>
-                  <div
-                    className={styles.overallFill}
-                    style={{ width: `${p.overall}%`, background: overallColor(p.overall) }}
-                  />
-                </div>
-                <span className={styles.overallLabel}>{p.overall}% Overall</span>
+                <ProgressBar
+                  value={p.overall}
+                  labelPosition="right"
+                  className={styles.overallBar}
+                  indicatorStyle={{ background: overallColor(p.overall) }}
+                />
+                <Text as="span" color="tertiary" className={styles.overallSuffix}>Overall</Text>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
 
-        <div className={styles.radarPanel}>
-          <div className={styles.projectName}>{selected.name}</div>
-          <div className={styles.projectTeam}>{selected.team}</div>
-          <ResponsiveContainer width="100%" height={280}>
-            <RadarChart data={radarData} outerRadius="75%">
-              <PolarGrid />
-              <PolarAngleAxis dataKey="axis" tick={{ fontSize: 13, fontWeight: 600 }} />
-              <Radar
-                dataKey="value"
-                stroke="#12B76A"
-                fill="#12B76A"
-                fillOpacity={0.35}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
+        <Card bordered elevation="elevation-1" className={styles.radarPanel}>
+          <CardHeader title={selected.name} description={selected.team} noDivider />
+          <CardBody>
+            <ResponsiveContainer width="100%" height={280}>
+              <RadarChart data={radarData} outerRadius="75%">
+                <PolarGrid />
+                <PolarAngleAxis dataKey="axis" tick={{ fontSize: 13, fontWeight: 600 }} />
+                <Radar dataKey="value" stroke="#12B76A" fill="#12B76A" fillOpacity={0.35} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </CardBody>
+        </Card>
       </div>
 
       <div className={styles.detailRow}>
-        <div className={styles.detailCard}>
-          <div className={styles.detailHeader}>
-            <span>Peer Review</span>
-            <span className={styles.detailBadge}>{selected.peerReview}%</span>
-          </div>
-          <div className={styles.detailProgress}>
-            <div className={styles.detailFill} style={{ width: `${selected.peerReview}%`, background: "#F59E0B" }} />
-          </div>
-          <div className={styles.detailList}>
-            <div className={styles.detailItem}><span>Reviews conducted</span><span>{selected.detail.peerReview.reviewsConducted}</span></div>
-            <div className={styles.detailItem}><span>Open findings</span><span>{selected.detail.peerReview.openFindings}</span></div>
-            <div className={styles.detailItem}><span>Close findings</span><span>{selected.detail.peerReview.closeFindings}</span></div>
-            <div className={styles.detailItem}><span>Practices met</span><span>{selected.detail.peerReview.practicesMet}</span></div>
-          </div>
-        </div>
+        <Card bordered elevation="elevation-1" className={styles.detailCard}>
+          <CardHeader
+            title="Peer Review"
+            noDivider
+            iconRight={<Badge color="primary" label={`${selected.peerReview}%`} />}
+          />
+          <CardBody>
+            <ProgressBar
+              value={selected.peerReview}
+              labelPosition="bottom-right"
+              indicatorStyle={{ background: "#F59E0B" }}
+            />
+            <div className={styles.detailList}>
+              <div className={styles.detailItem}><span>Reviews conducted</span><span>{selected.detail.peerReview.reviewsConducted}</span></div>
+              <div className={styles.detailItem}><span>Open findings</span><span>{selected.detail.peerReview.openFindings}</span></div>
+              <div className={styles.detailItem}><span>Close findings</span><span>{selected.detail.peerReview.closeFindings}</span></div>
+              <div className={styles.detailItem}><span>Practices met</span><span>{selected.detail.peerReview.practicesMet}</span></div>
+            </div>
+          </CardBody>
+        </Card>
 
-        <div className={styles.detailCard}>
-          <div className={styles.detailHeader}>
-            <span>Process Quality Assurance</span>
-            <span className={styles.detailBadge}>{selected.pqa}%</span>
-          </div>
-          <div className={styles.detailProgress}>
-            <div className={styles.detailFill} style={{ width: `${selected.pqa}%`, background: "#F59E0B" }} />
-          </div>
-          <div className={styles.detailList}>
-            <div className={styles.detailItem}><span>Audits completed</span><span>{selected.detail.pqa.auditsCompleted}</span></div>
-            <div className={styles.detailItem}><span>Non-compliances found</span><span>{selected.detail.pqa.nonCompliancesFound}</span></div>
-            <div className={styles.detailItem}><span>Process adherence</span><span>{selected.detail.pqa.processAdherence}</span></div>
-            <div className={styles.detailItem}><span>Last audit</span><span>{selected.detail.pqa.lastAudit}</span></div>
-          </div>
-        </div>
+        <Card bordered elevation="elevation-1" className={styles.detailCard}>
+          <CardHeader
+            title="Process Quality Assurance"
+            noDivider
+            iconRight={<Badge color="primary" label={`${selected.pqa}%`} />}
+          />
+          <CardBody>
+            <ProgressBar
+              value={selected.pqa}
+              labelPosition="bottom-right"
+              indicatorStyle={{ background: "#F59E0B" }}
+            />
+            <div className={styles.detailList}>
+              <div className={styles.detailItem}><span>Audits completed</span><span>{selected.detail.pqa.auditsCompleted}</span></div>
+              <div className={styles.detailItem}><span>Non-compliances found</span><span>{selected.detail.pqa.nonCompliancesFound}</span></div>
+              <div className={styles.detailItem}><span>Process adherence</span><span>{selected.detail.pqa.processAdherence}</span></div>
+              <div className={styles.detailItem}><span>Last audit</span><span>{selected.detail.pqa.lastAudit}</span></div>
+            </div>
+          </CardBody>
+        </Card>
 
-        <div className={styles.detailCard}>
-          <div className={styles.detailHeader}>
-            <span>Verification & Validation</span>
-            <span className={styles.detailBadge}>{selected.vv}%</span>
-          </div>
-          <div className={styles.detailProgress}>
-            <div className={styles.detailFill} style={{ width: `${selected.vv}%`, background: "#F59E0B" }} />
-          </div>
-          <div className={styles.detailList}>
-            <div className={styles.detailItem}><span>Verification passed</span><span>{selected.detail.vv.verificationPassed}</span></div>
-            <div className={styles.detailItem}><span>Validation passed</span><span>{selected.detail.vv.validationPassed}</span></div>
-            <div className={styles.detailItem}><span>Test coverage</span><span>{selected.detail.vv.testCoverage}</span></div>
-          </div>
-        </div>
+        <Card bordered elevation="elevation-1" className={styles.detailCard}>
+          <CardHeader
+            title="Verification & Validation"
+            noDivider
+            iconRight={<Badge color="primary" label={`${selected.vv}%`} />}
+          />
+          <CardBody>
+            <ProgressBar
+              value={selected.vv}
+              labelPosition="bottom-right"
+              indicatorStyle={{ background: "#F59E0B" }}
+            />
+            <div className={styles.detailList}>
+              <div className={styles.detailItem}><span>Verification passed</span><span>{selected.detail.vv.verificationPassed}</span></div>
+              <div className={styles.detailItem}><span>Validation passed</span><span>{selected.detail.vv.validationPassed}</span></div>
+              <div className={styles.detailItem}><span>Test coverage</span><span>{selected.detail.vv.testCoverage}</span></div>
+            </div>
+          </CardBody>
+        </Card>
       </div>
     </div>
   );

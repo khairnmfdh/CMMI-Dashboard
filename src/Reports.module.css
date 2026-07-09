@@ -20,22 +20,15 @@
   gap: 10px;
 }
 
-.downloadBtn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #2970FF;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
+.filterSelectWrapper {
+  border-radius: 999px !important;
+  padding: 8px 16px !important;
 }
 
-.downloadBtn:hover {
-  background: #1D5FE0;
+.filterSelectInput {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
 }
 
 .statsRow {
@@ -45,10 +38,9 @@
 }
 
 .statCard {
-  background: linear-gradient(135deg, #2970FF, #4C8DFF);
-  border-radius: 16px;
-  padding: 22px;
-  color: #fff;
+  background: linear-gradient(135deg, #2970FF, #4C8DFF) !important;
+  border-radius: 16px !important;
+  padding: 22px !important;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -67,16 +59,6 @@
 
 .chartCard {
   background: #fff;
-  border: 1px solid #E4E7EC;
-  border-radius: 16px;
-  padding: 20px;
-}
-
-.chartTitle {
-  font-size: 16px;
-  font-weight: 800;
-  color: #101828;
-  margin-bottom: 12px;
 }
 
 .legendLabel {
@@ -86,59 +68,16 @@
 
 .tablePanel {
   background: #fff;
-  border: 1px solid #E4E7EC;
-  border-radius: 16px;
-  padding: 20px;
-}
-
-.tableTitle {
-  font-size: 18px;
-  font-weight: 800;
-  color: #101828;
-  margin-bottom: 16px;
 }
 
 .table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.table th {
-  text-align: left;
-  padding: 10px 12px;
-  color: #667085;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.03em;
-  border-bottom: 2px solid #101828;
-}
-
-.table td {
-  padding: 14px 12px;
-  border-bottom: 1px solid #F2F4F7;
-  color: #344054;
-}
-
-.table tr:hover td {
-  background: #F9FAFB;
 }
 
 .idCell {
   font-weight: 700;
   color: #101828;
 }
-
-.statusPill {
-  display: inline-block;
-  padding: 3px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.statusDone { background: #ECFDF3; color: #027A48; }
-.statusInProgress { background: #EEF2FF; color: #4338CA; }
 
 @media (max-width: 1000px) {
   .chartsRow { grid-template-columns: 1fr; }
