@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Text, Divider } from '@legion-ui-kit/react-core';
 import logo from './assets/logo2.png';
 import './Header.css';
@@ -8,6 +9,21 @@ export const Header = ({
   onProfileClick,
   breadcrumbLabel = 'Dashboard',
 }) => {
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('app-theme') || 'dark';
+    setIsDark(savedTheme === 'dark');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = isDark ? 'light' : 'dark';
+    setIsDark(!isDark);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('app-theme', newTheme);
+  };
+
   return (
     <header className="header">
       <div className="header-left">
@@ -36,6 +52,14 @@ export const Header = ({
       </div>
 
       <div className="header-right">
+        <button 
+          className="header-icon-btn theme-toggle" 
+          onClick={toggleTheme}
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {isDark ? '🌞' : '🌙'}
+        </button>
+
         <button className="bell-btn">🔔</button>
 
         <Divider orientation="vertical" />

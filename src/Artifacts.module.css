@@ -7,12 +7,13 @@
 
 .topToolbar {
   display: flex;
-  background: rgba(30, 41, 59, 0.4);
+  background: var(--glass-panel);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
   padding: 8px;
   border-radius: 12px;
   overflow-x: auto;
+  box-shadow: var(--shadow-sm);
 }
 
 .toolList {
@@ -21,14 +22,14 @@
 }
 
 .toolBtn {
-  color: #94a3b8 !important;
+  color: var(--text-muted) !important;
   font-weight: 600 !important;
   transition: all 0.2s !important;
 }
 
 .toolBtn:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: #f8fafc !important;
+  background: var(--glass-hover) !important;
+  color: var(--text-primary) !important;
 }
 
 .filterBar {
@@ -42,10 +43,10 @@
   max-width: 400px;
   padding: 12px 20px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-main);
+  background: var(--bg-input);
   font-size: 14px;
-  color: #f8fafc;
+  color: var(--text-primary);
   outline: none;
   transition: all 0.3s;
 }
@@ -86,7 +87,7 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .projectInfo {
@@ -97,13 +98,13 @@
 .projectName {
   font-size: 20px;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .projectMeta {
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .artifactGrid {
@@ -113,22 +114,23 @@
 }
 
 .artifactCard {
-  background: rgba(30, 41, 59, 0.4);
+  background: var(--glass-panel);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  color: #c7d2fe;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: var(--text-secondary);
   padding: 16px 24px;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .artifactCard:hover {
-  background: rgba(99, 102, 241, 0.15);
+  background: rgba(99, 102, 241, 0.1);
   border-color: #8b5cf6;
-  color: #fff;
+  color: var(--text-primary);
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(139, 92, 246, 0.2);
 }
