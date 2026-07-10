@@ -7,12 +7,6 @@ import {
 import { Select } from "@legion-ui-kit/react-core";
 import styles from "../Projects.module.css";
 
-const chartData = [
-  { name: "Netmonk", "Peer Review": 13000, "Process QA": 11000, "V&V": 20000 },
-  { name: "PaDi UMKM", "Peer Review": 19500, "Process QA": 15500, "V&V": 9000 },
-  { name: "Legion AI", "Peer Review": 12500, "Process QA": 20000, "V&V": 8500 },
-];
-
 const statOptions = [{ label: "All Statuses", value: "all" }];
 const levelOptions = [{ label: "All CMMI Levels", value: "all" }];
 
@@ -28,6 +22,7 @@ export const Projects = () => {
   const [level, setLevel] = useState("all");
   const [projects, setProjects] = useState([]);
   const [metrics, setMetrics] = useState(null);
+  const [chartData, setChartData] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -37,51 +32,70 @@ export const Projects = () => {
         const res = await axios.get("http://localhost:8080/api/v1/projects/cmmi-details");
         const data = res.data.data;
         
-        // Combine projects with their breakdowns so the UI works seamlessly
-        const combinedProjects = data.projects.map((p, index) => {
-          // Find matching breakdown, assuming they are in same order for now
-          // In real life, we would match by ID. Here we just map sequentially.
+        let sumPr = 0, sumPqa = 0, sumVv = 0;
+
+        const combinedProjects = data.projects.map((p) => {
           const b = data.breakdowns;
+          
+          const prScore = Math.round((p.pr_achieved / (p.pr_target || 1)) * 100);
+          const pqaScore = Math.round((p.pqa_achieved / (p.pqa_target || 1)) * 100);
+          const vvScore = Math.round((p.vv_achieved / (p.vv_target || 1)) * 100);
+          const overallScore = Math.round((p.overall_achieved / (p.overall_target || 1)) * 100);
+          
+          sumPr += prScore;
+          sumPqa += pqaScore;
+          sumVv += vvScore;
+
           return {
             id: p.name.toLowerCase().replace(/ /g, "-"),
             name: p.name,
             team: p.team,
             status: p.status,
             level: p.level,
-            peerReview: p.pr_score,
-            pqa: p.pqa_score,
-            vv: p.vv_score,
-            overall: p.overall_pct,
+            peerReview: prScore,
+            pqa: pqaScore,
+            vv: vvScore,
+            overall: overallScore,
             detail: {
               peerReview: {
-                reviewsConducted: b[0].details["Reviews conducted"],
-                openFindings: b[0].details["Open findings"],
-                closeFindings: b[0].details["Close findings"],
-                practicesMet: b[0].details["Practices met"]
+                reviewsConducted: b[0]?.details["Reviews conducted"] || p.pr_achieved,
+                openFindings: b[0]?.details["Open findings"] || 0,
+                closeFindings: b[0]?.details["Close findings"] || 0,
+                practicesMet: `${p.pr_achieved}/${p.pr_target}`
               },
               pqa: {
-                auditsCompleted: b[1].details["Audits completed"],
-                nonCompliancesFound: b[1].details["Non-compliances found"],
-                processAdherence: b[1].details["Process adherence"],
-                lastAudit: b[1].details["Last audit"]
+                auditsCompleted: b[1]?.details["Audits completed"] || p.pqa_achieved,
+                nonCompliancesFound: b[1]?.details["Non-compliances found"] || 0,
+                processAdherence: `${pqaScore}%`,
+                lastAudit: b[1]?.details["Last audit"] || "N/A"
               },
               vv: {
-                verificationPassed: b[2].details["Verification passed"],
-                validationPassed: b[2].details["Validation passed"],
-                testCoverage: b[2].details["Test coverage"]
+                verificationPassed: b[2]?.details["Verification passed"] || p.vv_achieved,
+                validationPassed: b[2]?.details["Validation passed"] || p.vv_achieved,
+                testCoverage: b[2]?.details["Test coverage"] || "100%"
               }
             }
           };
         });
 
+        const count = combinedProjects.length || 1;
+
         setProjects(combinedProjects);
         setMetrics({
           total_projects: data.total_projects,
-          avg_pr: data.avg_pr_score,
-          avg_pqa: data.avg_pqa_score,
-          avg_vv: data.avg_vv_score
+          avg_pr: Math.round(sumPr / count),
+          avg_pqa: Math.round(sumPqa / count),
+          avg_vv: Math.round(sumVv / count)
         });
-        setSelectedId(combinedProjects[0].id);
+        
+        const newChartData = combinedProjects.map(p => ({
+          name: p.name,
+          "Peer Review": p.peerReview,
+          "Process QA": p.pqa,
+          "V&V": p.vv
+        }));
+        setChartData(newChartData);
+        setSelectedId(combinedProjects[0]?.id || "");
       } catch (err) {
         console.error("Failed to fetch projects", err);
       } finally {
@@ -91,10 +105,10 @@ export const Projects = () => {
     fetchProjects();
   }, []);
 
-  if (loading) return <div style={{ padding: 40, color: "white" }}>Loading Projects...</div>;
-  if (!projects.length) return <div style={{ padding: 40, color: "white" }}>Failed to load data.</div>;
+  if (loading) return <div style={{ padding: 40, color: "var(--text-primary)" }}>Loading Projects...</div>;
+  if (!projects.length) return <div style={{ padding: 40, color: "var(--text-primary)" }}>Failed to load data.</div>;
 
-  const selected = projects.find((p) => p.id === selectedId);
+  const selected = projects.find((p) => p.id === selectedId) || projects[0];
   const radarData = [
     { axis: "PR", value: selected.peerReview },
     { axis: "PQA", value: selected.pqa },
@@ -116,17 +130,17 @@ export const Projects = () => {
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Avg Peer Review</div>
           <div className={styles.statValue}>{metrics.avg_pr}%</div>
-          <div className={styles.statSub}>39/50 practices met</div>
+          <div className={styles.statSub}>Based on all practices</div>
         </div>
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Avg PQA Score</div>
           <div className={styles.statValue}>{metrics.avg_pqa}%</div>
-          <div className={styles.statSub}>39/50 practices met</div>
+          <div className={styles.statSub}>Based on all practices</div>
         </div>
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Avg V&V Score</div>
           <div className={styles.statValue}>{metrics.avg_vv}%</div>
-          <div className={styles.statSub}>39/50 practices met</div>
+          <div className={styles.statSub}>Based on all practices</div>
         </div>
       </div>
 
@@ -146,8 +160,8 @@ export const Projects = () => {
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-            <YAxis tickFormatter={(v) => `${v / 1000}k`} tick={{ fontSize: 12 }} />
+            <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--text-secondary)" }} />
+            <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 12, fill: "var(--text-secondary)" }} />
             <Tooltip />
             <Bar dataKey="Peer Review" fill="#F59E0B" radius={[4, 4, 0, 0]} />
             <Bar dataKey="Process QA" fill="#F04438" radius={[4, 4, 0, 0]} />
@@ -208,8 +222,8 @@ export const Projects = () => {
           <div className={styles.projectTeam}>{selected.team}</div>
           <ResponsiveContainer width="100%" height={280}>
             <RadarChart data={radarData} outerRadius="75%">
-              <PolarGrid />
-              <PolarAngleAxis dataKey="axis" tick={{ fontSize: 13, fontWeight: 600 }} />
+              <PolarGrid stroke="var(--border-main)" />
+              <PolarAngleAxis dataKey="axis" tick={{ fontSize: 13, fontWeight: 600, fill: "var(--text-secondary)" }} />
               <Radar
                 dataKey="value"
                 stroke="#12B76A"
