@@ -37,10 +37,10 @@ export const Projects = () => {
         const combinedProjects = data.projects.map((p) => {
           const b = data.breakdowns;
           
-          const prScore = Math.round((p.pr_achieved / (p.pr_target || 1)) * 100);
-          const pqaScore = Math.round((p.pqa_achieved / (p.pqa_target || 1)) * 100);
-          const vvScore = Math.round((p.vv_achieved / (p.vv_target || 1)) * 100);
-          const overallScore = Math.round((p.overall_achieved / (p.overall_target || 1)) * 100);
+          const prScore = p.pr_achieved;
+          const pqaScore = p.pqa_achieved;
+          const vvScore = p.vv_achieved;
+          const overallScore = p.overall_achieved;
           
           sumPr += prScore;
           sumPqa += pqaScore;
@@ -56,6 +56,10 @@ export const Projects = () => {
             pqa: pqaScore,
             vv: vvScore,
             overall: overallScore,
+            prTarget: p.pr_target,
+            pqaTarget: p.pqa_target,
+            vvTarget: p.vv_target,
+            overallTarget: p.overall_target,
             detail: {
               peerReview: {
                 reviewsConducted: b[0]?.details["Reviews conducted"] || p.pr_achieved,
@@ -66,7 +70,7 @@ export const Projects = () => {
               pqa: {
                 auditsCompleted: b[1]?.details["Audits completed"] || p.pqa_achieved,
                 nonCompliancesFound: b[1]?.details["Non-compliances found"] || 0,
-                processAdherence: `${pqaScore}%`,
+                processAdherence: `${p.pqa_achieved}/${p.pqa_target}`,
                 lastAudit: b[1]?.details["Last audit"] || "N/A"
               },
               vv: {
@@ -83,9 +87,9 @@ export const Projects = () => {
         setProjects(combinedProjects);
         setMetrics({
           total_projects: data.total_projects,
-          avg_pr: Math.round(sumPr / count),
-          avg_pqa: Math.round(sumPqa / count),
-          avg_vv: Math.round(sumVv / count)
+          avg_pr: (sumPr / count).toFixed(1),
+          avg_pqa: (sumPqa / count).toFixed(1),
+          avg_vv: (sumVv / count).toFixed(1)
         });
         
         const newChartData = combinedProjects.map(p => ({
@@ -129,18 +133,18 @@ export const Projects = () => {
         </div>
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Avg Peer Review</div>
-          <div className={styles.statValue}>{metrics.avg_pr}%</div>
-          <div className={styles.statSub}>Based on all practices</div>
+          <div className={styles.statValue}>{metrics.avg_pr}</div>
+          <div className={styles.statSub}>Average Score</div>
         </div>
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Avg PQA Score</div>
-          <div className={styles.statValue}>{metrics.avg_pqa}%</div>
-          <div className={styles.statSub}>Based on all practices</div>
+          <div className={styles.statValue}>{metrics.avg_pqa}</div>
+          <div className={styles.statSub}>Average Score</div>
         </div>
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Avg V&V Score</div>
-          <div className={styles.statValue}>{metrics.avg_vv}%</div>
-          <div className={styles.statSub}>Based on all practices</div>
+          <div className={styles.statValue}>{metrics.avg_vv}</div>
+          <div className={styles.statSub}>Average Score</div>
         </div>
       </div>
 
@@ -161,7 +165,7 @@ export const Projects = () => {
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--text-secondary)" }} />
-            <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 12, fill: "var(--text-secondary)" }} />
+            <YAxis tick={{ fontSize: 12, fill: "var(--text-secondary)" }} domain={[0, 3]} />
             <Tooltip />
             <Bar dataKey="Peer Review" fill="#F59E0B" radius={[4, 4, 0, 0]} />
             <Bar dataKey="Process QA" fill="#F04438" radius={[4, 4, 0, 0]} />
@@ -192,15 +196,15 @@ export const Projects = () => {
               <div className={styles.projectMetrics}>
                 <div className={styles.metricBox}>
                   <div className={styles.metricLabel}>Peer Review</div>
-                  <div className={styles.metricValue}>{p.peerReview}%</div>
+                  <div className={styles.metricValue}>{p.peerReview}/{p.prTarget}</div>
                 </div>
                 <div className={styles.metricBox}>
                   <div className={styles.metricLabel}>PQA</div>
-                  <div className={styles.metricValue}>{p.pqa}%</div>
+                  <div className={styles.metricValue}>{p.pqa}/{p.pqaTarget}</div>
                 </div>
                 <div className={styles.metricBox}>
                   <div className={styles.metricLabel}>VV</div>
-                  <div className={styles.metricValue}>{p.vv}%</div>
+                  <div className={styles.metricValue}>{p.vv}/{p.vvTarget}</div>
                 </div>
               </div>
 
@@ -208,10 +212,10 @@ export const Projects = () => {
                 <div className={styles.overallTrack}>
                   <div
                     className={styles.overallFill}
-                    style={{ width: `${p.overall}%`, background: overallColor(p.overall) }}
+                    style={{ width: `${(p.overall / p.overallTarget) * 100}%`, background: overallColor((p.overall / p.overallTarget) * 100) }}
                   />
                 </div>
-                <span className={styles.overallLabel}>{p.overall}% Overall</span>
+                <span className={styles.overallLabel}>{p.overall}/{p.overallTarget} Overall</span>
               </div>
             </div>
           ))}
@@ -239,10 +243,10 @@ export const Projects = () => {
         <div className={styles.detailCard}>
           <div className={styles.detailHeader}>
             <span>Peer Review</span>
-            <span className={styles.detailBadge}>{selected.peerReview}%</span>
+            <span className={styles.detailBadge}>{selected.peerReview}/{selected.prTarget}</span>
           </div>
           <div className={styles.detailProgress}>
-            <div className={styles.detailFill} style={{ width: `${selected.peerReview}%`, background: "#F59E0B" }} />
+            <div className={styles.detailFill} style={{ width: `${(selected.peerReview / selected.prTarget) * 100}%`, background: "#F59E0B" }} />
           </div>
           <div className={styles.detailList}>
             <div className={styles.detailItem}><span>Reviews conducted</span><span>{selected.detail.peerReview.reviewsConducted}</span></div>
@@ -255,10 +259,10 @@ export const Projects = () => {
         <div className={styles.detailCard}>
           <div className={styles.detailHeader}>
             <span>Process Quality Assurance</span>
-            <span className={styles.detailBadge}>{selected.pqa}%</span>
+            <span className={styles.detailBadge}>{selected.pqa}/{selected.pqaTarget}</span>
           </div>
           <div className={styles.detailProgress}>
-            <div className={styles.detailFill} style={{ width: `${selected.pqa}%`, background: "#F59E0B" }} />
+            <div className={styles.detailFill} style={{ width: `${(selected.pqa / selected.pqaTarget) * 100}%`, background: "#F59E0B" }} />
           </div>
           <div className={styles.detailList}>
             <div className={styles.detailItem}><span>Audits completed</span><span>{selected.detail.pqa.auditsCompleted}</span></div>
@@ -271,10 +275,10 @@ export const Projects = () => {
         <div className={styles.detailCard}>
           <div className={styles.detailHeader}>
             <span>Verification & Validation</span>
-            <span className={styles.detailBadge}>{selected.vv}%</span>
+            <span className={styles.detailBadge}>{selected.vv}/{selected.vvTarget}</span>
           </div>
           <div className={styles.detailProgress}>
-            <div className={styles.detailFill} style={{ width: `${selected.vv}%`, background: "#F59E0B" }} />
+            <div className={styles.detailFill} style={{ width: `${(selected.vv / selected.vvTarget) * 100}%`, background: "#F59E0B" }} />
           </div>
           <div className={styles.detailList}>
             <div className={styles.detailItem}><span>Verification passed</span><span>{selected.detail.vv.verificationPassed}</span></div>
