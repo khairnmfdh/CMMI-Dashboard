@@ -160,7 +160,7 @@ export const Projects = () => {
       </div>
 
       <div className={styles.panel}>
-        <h3 className={styles.panelTitle}>Process area Scores - all projects</h3>
+        <h3 className={styles.panelTitle}>Practices Met by Process Area</h3>
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
