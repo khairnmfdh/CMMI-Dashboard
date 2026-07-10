@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: #FAFAFB;
+  background: var(--bg-app);
   min-height: 100%;
 }
 
@@ -32,10 +32,12 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .downloadBtn:hover {
   background: #1D5FE0;
+  transform: translateY(-2px);
 }
 
 .statsRow {
@@ -45,14 +47,15 @@
 }
 
 .statCard {
-  background: linear-gradient(135deg, #2970FF, #4C8DFF);
-  border-radius: 16px;
-  padding: 22px;
-  color: #fff;
+  background: linear-gradient(135deg, #2970FF, #4C8DFF) !important;
+  border-radius: 16px !important;
+  padding: 22px !important;
+  color: #fff !important;
   text-align: center;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  box-shadow: var(--shadow-sm) !important;
 }
 
 .statLabel { font-size: 16px; font-weight: 700; }
@@ -66,35 +69,37 @@
 }
 
 .chartCard {
-  background: #fff;
-  border: 1px solid #E4E7EC;
-  border-radius: 16px;
-  padding: 20px;
+  background: var(--glass-panel) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 16px !important;
+  padding: 20px !important;
+  box-shadow: var(--shadow-sm) !important;
 }
 
 .chartTitle {
   font-size: 16px;
   font-weight: 800;
-  color: #101828;
+  color: var(--text-primary) !important;
   margin-bottom: 12px;
 }
 
 .legendLabel {
   font-size: 12px;
-  color: #475467;
+  color: var(--text-secondary);
 }
 
 .tablePanel {
-  background: #fff;
-  border: 1px solid #E4E7EC;
-  border-radius: 16px;
-  padding: 20px;
+  background: var(--glass-panel) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 16px !important;
+  padding: 20px !important;
+  box-shadow: var(--shadow-sm) !important;
 }
 
 .tableTitle {
   font-size: 18px;
   font-weight: 800;
-  color: #101828;
+  color: var(--text-primary) !important;
   margin-bottom: 16px;
 }
 
@@ -107,26 +112,26 @@
 .table th {
   text-align: left;
   padding: 10px 12px;
-  color: #667085;
+  color: var(--text-muted);
   font-weight: 700;
   font-size: 12px;
   letter-spacing: 0.03em;
-  border-bottom: 2px solid #101828;
+  border-bottom: 2px solid var(--border-main);
 }
 
 .table td {
   padding: 14px 12px;
-  border-bottom: 1px solid #F2F4F7;
-  color: #344054;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-secondary);
 }
 
 .table tr:hover td {
-  background: #F9FAFB;
+  background: var(--glass-hover);
 }
 
 .idCell {
   font-weight: 700;
-  color: #101828;
+  color: var(--text-primary) !important;
 }
 
 .statusPill {
@@ -137,8 +142,8 @@
   font-weight: 600;
 }
 
-.statusDone { background: #ECFDF3; color: #027A48; }
-.statusInProgress { background: #EEF2FF; color: #4338CA; }
+.statusDone { background: rgba(18, 183, 106, 0.15); color: #32d583; }
+.statusInProgress { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
 
 @media (max-width: 1000px) {
   .chartsRow { grid-template-columns: 1fr; }
