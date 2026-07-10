@@ -165,7 +165,7 @@ export const Projects = () => {
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--text-secondary)" }} />
-            <YAxis tick={{ fontSize: 12, fill: "var(--text-secondary)" }} domain={[0, 3]} />
+            <YAxis tick={{ fontSize: 12, fill: "var(--text-secondary)" }} />
             <Tooltip />
             <Bar dataKey="Peer Review" fill="#F59E0B" radius={[4, 4, 0, 0]} />
             <Bar dataKey="Process QA" fill="#F04438" radius={[4, 4, 0, 0]} />
