@@ -8,9 +8,16 @@ import { CardBody } from "@legion-ui-kit/react-core";
 import Projects from "./pages/Projects";
 import Artifacts from "./pages/Artifacts";
 import Reports from "./pages/Reports";
+import Authentication from "./pages/Authentication";
+import Register from "./pages/Register";
+
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authView, setAuthView] = useState("signin");
   const [activeLabel, setActiveLabel] = useState("Home");
+
+  // if (!user) return <AuthLanding onLogin={setUser} />;
 
   const renderPage = () => {
     switch (activeLabel) {
@@ -28,29 +35,24 @@ function App() {
         return <ProcessArea key="vv" initialTab="vv" />;
       case "Reports":
         return <Reports />;
-      case "Product 1":
-      case "Product 2":
-      case "Product 3":
-        return (
-          <CardBody title={activeLabel}>
-            {activeLabel} page coming soon
-          </CardBody>
-        );
-      case "Service 1":
-      case "Service 2":
-      case "Service 3":
-        return (
-          <CardBody title={activeLabel}>
-            {activeLabel} page coming soon
-          </CardBody>
-        );
-      case "About":
-        return <CardBody title="About">About page coming soon</CardBody>;
       default:
         return <Dashboard />;
     }
   };
 
+  if (!isAuthenticated) {
+    return authView === "signin" ? (
+      <Authentication
+        onSignIn={() => setIsAuthenticated(true)}
+        onNavigate={setAuthView}
+      />
+    ) : (
+      <Register
+        onRegister={() => setIsAuthenticated(true)}
+        onNavigate={setAuthView}
+      />
+    );
+  }
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar activeLabel={activeLabel} onNavigate={setActiveLabel} />

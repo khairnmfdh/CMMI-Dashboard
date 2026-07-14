@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Card,
   Text,
@@ -35,24 +35,6 @@ const statCards = [
   },
 ];
 
-const assessmentProgress = [
-  { label: "NETMONK", pct: 88 },
-  { label: "PaDi UMKM", pct: 74 },
-  { label: "Legion AI", pct: 78 },
-];
-
-const piidResults = [
-  { count: 14, label: "Achieved", tone: "achieved" },
-  { count: 18, label: "Partially Achieved", tone: "partial" },
-  { count: 22, label: "Not Achieved", tone: "notAchieved" },
-];
-
-const recentActivities = Array.from({ length: 6 }).map((_, i) => ({
-  id: i,
-  time: "Today · 09:42",
-  text: "User123 approved evidence for PQA - 2.3",
-}));
-
 const processAreaOptions = [
   { label: "All Process Area", value: "all" },
   { label: "Peer Review", value: "peer-review" },
@@ -60,28 +42,135 @@ const processAreaOptions = [
   { label: "Verification & Validation", value: "vv" },
 ];
 
-// ── Recharts data ──────────────────────────────────────────────────────────────
+const AREA_DATA = {
+  all: {
+    productProcessArea: [
+      { label: "NETMONK", pct: 82 },
+      { label: "PaDi UMKM", pct: 71 },
+      { label: "Legion AI", pct: 40 },
+    ],
+    piidResults: [
+      { count: 14, label: "Achieved", tone: "achieved" },
+      { count: 18, label: "Partially Achieved", tone: "partial" },
+      { count: 22, label: "Not Achieved", tone: "notAchieved" },
+    ],
+  },
+  "peer-review": {
+    productProcessArea: [
+      { label: "NETMONK", pct: 25 },
+      { label: "PaDi UMKM", pct: 50 },
+      { label: "Legion AI", pct: 78 },
+    ],
+    piidResults: [
+      { count: 6, label: "Achieved", tone: "achieved" },
+      { count: 5, label: "Partially Achieved", tone: "partial" },
+      { count: 9, label: "Not Achieved", tone: "notAchieved" },
+    ],
+  },
+  pqa: {
+    productProcessArea: [
+      { label: "NETMONK", pct: 66 },
+      { label: "PaDi UMKM", pct: 40 },
+      { label: "Legion AI", pct: 30 },
+    ],
+    piidResults: [
+      { count: 5, label: "Achieved", tone: "achieved" },
+      { count: 7, label: "Partially Achieved", tone: "partial" },
+      { count: 8, label: "Not Achieved", tone: "notAchieved" },
+    ],
+  },
+  vv: {
+    productProcessArea: [
+      { label: "NETMONK", pct: 20 },
+      { label: "PaDi UMKM", pct: 78 },
+      { label: "Legion AI", pct: 38 },
+    ],
+    piidResults: [
+      { count: 3, label: "Achieved", tone: "achieved" },
+      { count: 6, label: "Partially Achieved", tone: "partial" },
+      { count: 5, label: "Not Achieved", tone: "notAchieved" },
+    ],
+  },
+};
 
-// Practice Status — grouped bar chart
-const practiceStatusData = [
-  { name: "Netmonk", Achieved: 20, Partial: 2, NotAchieved: 13 },
-  { name: "PaDi UMKM", Achieved: 10, Partial: 15, NotAchieved: 20 },
-  { name: "Legion AI", Achieved: 2, Partial: 18, NotAchieved: 13 },
-];
-
-// Total Weakness — horizontal bar chart
-const weaknessData = [
-  { name: "Netmonk", value: 7.8 },
-  { name: "PaDi UMKM", value: 4.2 },
-  { name: "Legion AI", value: 10.3 },
-];
+const recentActivities = Array.from({ length: 6 }).map((_, i) => ({
+  id: i,
+  time: "Today · 09:42",
+  text: "User123 approved evidence for PQA - 2.3",
+}));
 
 const WEAKNESS_COLORS = ["#4F46E5", "#6366F1", "#818CF8"];
+
+// ── Proportional project split ─────────────────────────────────────────────
+// Netmonk gets 1/2, PaDi UMKM gets 2/7, Legion AI gets 3/14 of any total.
+// Verified against the example: split(14) => [7, 4, 3].
+const PROJECT_NAMES = ["Netmonk", "PaDi UMKM", "Legion AI"];
+const PROJECT_WEIGHTS = [1 / 2, 2 / 7, 3 / 14];
+
+function splitByProject(total) {
+  const raw = PROJECT_WEIGHTS.map((w) => total * w);
+  const floors = raw.map(Math.floor);
+  const used = floors.reduce((a, b) => a + b, 0);
+  let remainder = total - used;
+
+  const order = raw
+    .map((r, i) => ({ i, frac: r - floors[i] }))
+    .sort((a, b) => b.frac - a.frac);
+
+  const result = [...floors];
+  for (let k = 0; k < remainder; k++) {
+    result[order[k].i] += 1;
+  }
+  return result; // [netmonkCount, padiCount, legionCount]
+}
+
+function niceMax(value) {
+  if (value <= 10) return Math.ceil(value / 2) * 2 || 2;
+  if (value <= 25) return Math.ceil(value / 5) * 5;
+  return Math.ceil(value / 10) * 10;
+}
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export const Dashboard = () => {
   const [selectedArea, setSelectedArea] = useState("all");
+
+  const { productProcessArea, piidResults } =
+    AREA_DATA[selectedArea] || AREA_DATA.all;
+
+  const findCount = (tone) =>
+    piidResults.find((r) => r.tone === tone)?.count ?? 0;
+
+  const practiceStatusData = useMemo(() => {
+    const achieved = splitByProject(findCount("achieved"));
+    const partial = splitByProject(findCount("partial"));
+    const notAchieved = splitByProject(findCount("notAchieved"));
+
+    return PROJECT_NAMES.map((name, i) => ({
+      name,
+      Achieved: achieved[i],
+      Partial: partial[i],
+      NotAchieved: notAchieved[i],
+    }));
+  }, [piidResults]);
+
+  const weaknessData = useMemo(() => {
+    const notAchieved = splitByProject(findCount("notAchieved"));
+    return PROJECT_NAMES.map((name, i) => ({
+      name,
+      value: notAchieved[i],
+    }));
+  }, [piidResults]);
+
+  const practiceMax = niceMax(
+    Math.max(...practiceStatusData.flatMap((d) => [d.Achieved, d.Partial, d.NotAchieved]), 1)
+  );
+  const weaknessMax = niceMax(Math.max(...weaknessData.map((d) => d.value), 1));
+  const weaknessStep = weaknessMax <= 10 ? 2 : weaknessMax <= 25 ? 5 : 10;
+  const weaknessTicks = Array.from(
+    { length: Math.floor(weaknessMax / weaknessStep) + 1 },
+    (_, i) => i * weaknessStep
+  );
 
   return (
     <div className={styles.dashboard}>
@@ -114,7 +203,7 @@ export const Dashboard = () => {
         ))}
       </div>
 
-      {/* ── Mid grid: Assessment Progress + PIID ── */}
+      {/* ── Mid grid ── */}
       <div className={styles.midGrid}>
         <Card className={styles.panel}>
           <div className={styles.panelHeader}>
@@ -123,7 +212,7 @@ export const Dashboard = () => {
             </Text>
           </div>
           <div className={styles.progressList}>
-            {assessmentProgress.map((item) => (
+            {productProcessArea.map((item) => (
               <div key={item.label} className={styles.progressItem}>
                 <Text as="p" className={styles.progressLabel}>
                   {item.label}
@@ -135,9 +224,11 @@ export const Dashboard = () => {
         </Card>
 
         <Card className={styles.panel}>
-          <Text as="h3" variant="heading">
-            PIID Result
-          </Text>
+          <div className={styles.panelHeader}>
+            <Text as="h3" variant="heading">
+              PIID Result
+            </Text>
+          </div>
           <div className={styles.piidList}>
             {piidResults.map((item) => (
               <div key={item.label} className={styles.piidItem}>
@@ -157,11 +248,13 @@ export const Dashboard = () => {
 
       {/* ── Bottom grid ── */}
       <div className={styles.bottomGrid}>
-        {/* Recent Assessment Activities */}
         <Card className={styles.panel}>
-          <Text as="h3" variant="heading">
-            Recent Assessment Activities
-          </Text>
+          <div className={styles.panelHeader}>
+            <Text as="h3" variant="heading">
+              Recent Assessment Activities
+            </Text>
+          </div>
+
           <div className={styles.timeline}>
             {recentActivities.map((activity, i) => (
               <div key={activity.id} className={styles.timelineItem}>
@@ -185,15 +278,16 @@ export const Dashboard = () => {
           </div>
         </Card>
 
-        {/* Right column: charts */}
         <div className={styles.bottomRightCol}>
-          {/* Practice Status Distribution — Recharts grouped BarChart */}
+          {/* Practice Status Distribution — now derived from PIID split per project */}
           <Card className={styles.panel}>
-            <Text as="h3" variant="heading">
-              Practice Status Distribution
-            </Text>
+            <div className={styles.panelHeader}>
+              <Text as="h3" variant="heading">
+                Practice Status Distribution
+              </Text>
+            </div>
 
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={285}>
               <BarChart
                 data={practiceStatusData}
                 barSize={16}
@@ -212,11 +306,11 @@ export const Dashboard = () => {
                   tickLine={false}
                 />
                 <YAxis
-                  domain={[0, 25]}
-                  ticks={[0, 5, 10, 15, 20, 25]}
+                  domain={[0, practiceMax]}
                   tick={{ fontSize: 11, fill: "#667085" }}
                   axisLine={false}
                   tickLine={false}
+                  allowDecimals={false}
                 />
                 <Tooltip
                   contentStyle={{
@@ -269,13 +363,13 @@ export const Dashboard = () => {
             </div>
           </Card>
 
-          {/* Total Weakness — Recharts horizontal BarChart */}
+          {/* Total Weakness — Not Achieved count split per project, filter-reactive */}
           <Card className={styles.panel}>
             <Text as="h3" className={styles.weaknessChartTitle}>
               Total Weakness
             </Text>
 
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={280}>
               <BarChart
                 data={weaknessData}
                 layout="vertical"
@@ -290,11 +384,12 @@ export const Dashboard = () => {
                 />
                 <XAxis
                   type="number"
-                  domain={[0, 22]}
-                  ticks={[2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]}
+                  domain={[0, weaknessMax]}
+                  ticks={weaknessTicks}
                   tick={{ fontSize: 11, fill: "#667085" }}
                   axisLine={false}
                   tickLine={false}
+                  allowDecimals={false}
                 />
                 <YAxis
                   type="category"
@@ -311,7 +406,7 @@ export const Dashboard = () => {
                     border: "1px solid #E4E7EC",
                     background: "#fff",
                   }}
-                  formatter={(v) => [v, "Weakness"]}
+                  formatter={(v) => [v, "Not Achieved"]}
                 />
                 <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                   {weaknessData.map((_, i) => (

@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: #FAFAFB;
+  background: #fafafb;
   min-height: 100%;
 }
 
@@ -13,7 +13,7 @@
 
 .tabList {
   width: fit-content;
-  background: #2970FF;
+  background: linear-gradient(200deg, #875bf7, #6938ef) !important;
   border-radius: 14px;
   padding: 4px;
 }
@@ -29,7 +29,7 @@
 
 .tabActive {
   background: #fff !important;
-  color: #2970FF !important;
+  color: #2970ff !important;
   font-weight: 700;
 }
 
@@ -43,7 +43,7 @@
 .sectionTitleBar {
   width: 4px;
   height: 20px;
-  background: #2970FF;
+  background: linear-gradient(135deg, #875bf7, #6938ef) !important;
   border-radius: 2px;
 }
 
@@ -89,13 +89,13 @@
 .kpiValueDetect {
   font-size: 26px;
   font-weight: 700;
-  color: #2970FF;
+  color: #2970ff;
 }
 
 .kpiValueLeak {
   font-size: 26px;
   font-weight: 700;
-  color: #F04438;
+  color: #f04438;
 }
 
 .kpiSub {
@@ -139,7 +139,7 @@
 }
 
 .idCell {
-  color: #2970FF;
+  color: #2970ff;
   font-weight: 600;
 }
 
@@ -148,7 +148,7 @@
 }
 
 .mutedCell {
-  color: #98A2B3;
+  color: #98a2b3;
 }
 
 @media (max-width: 900px) {

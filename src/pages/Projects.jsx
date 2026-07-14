@@ -1,9 +1,26 @@
 import { useState } from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  RadarChart, PolarGrid, PolarAngleAxis, Radar,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  Radar,
 } from "recharts";
-import { Card, CardHeader, CardBody, Text, Select, Badge, ProgressBar } from "@legion-ui-kit/react-core";
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Text,
+  Select,
+  Badge,
+  ProgressBar,
+} from "@legion-ui-kit/react-core";
 import styles from "../Projects.module.css";
 
 const projects = [
@@ -12,11 +29,13 @@ const projects = [
     name: "NETMONK",
     team: "Team User123",
     status: "Active",
-    level: "Level 3 - Defined",
-    peerReview: 78,
-    pqa: 78,
-    vv: 78,
-    overall: 40,
+    statusValue: "active",
+    level: "Level 2 - Managed",
+    levelValue: "level-2",
+    peerReview: 25,
+    pqa: 66,
+    vv: 20,
+    overall: 82,
     detail: {
       peerReview: { reviewsConducted: 6, openFindings: 4, closeFindings: 11, practicesMet: "PR.1.1, PR.1.2, PR.2.1" },
       pqa: { auditsCompleted: 6, nonCompliancesFound: 6, processAdherence: "86%", lastAudit: "2026-06-10" },
@@ -28,9 +47,11 @@ const projects = [
     name: "PaDi UMKM",
     team: "Team User123",
     status: "Active",
+    statusValue: "active",
     level: "Level 3 - Defined",
-    peerReview: 78,
-    pqa: 78,
+    levelValue: "level-3",
+    peerReview: 50,
+    pqa: 40,
     vv: 78,
     overall: 71,
     detail: {
@@ -43,12 +64,14 @@ const projects = [
     id: "legion-ai",
     name: "Legion AI",
     team: "Team User123",
-    status: "Active",
-    level: "Level 3 - Defined",
+    status: "Inactive",
+    statusValue: "inactive",
+    level: "Level 4 - Quantitatively Managed",
+    levelValue: "level-4",
     peerReview: 78,
-    pqa: 78,
-    vv: 78,
-    overall: 82,
+    pqa: 33,
+    vv: 38,
+    overall: 40,
     detail: {
       peerReview: { reviewsConducted: 9, openFindings: 1, closeFindings: 17, practicesMet: "PR.1.1, PR.1.2, PR.2.1" },
       pqa: { auditsCompleted: 9, nonCompliancesFound: 1, processAdherence: "95%", lastAudit: "2026-06-14" },
@@ -63,8 +86,20 @@ const chartData = [
   { name: "Legion AI", "Peer Review": 12500, "Process QA": 20000, "V&V": 8500 },
 ];
 
-const statusOptions = [{ label: "All Statuses", value: "all" }];
-const levelOptions = [{ label: "All CMMI Levels", value: "all" }];
+const statusOptions = [
+  { label: "All Statuses", value: "all" },
+  { label: "Active", value: "active" },
+  { label: "Inactive", value: "inactive" },
+];
+
+const levelOptions = [
+  { label: "All CMMI Levels", value: "all" },
+  { label: "Level 1 - Initial", value: "level-1" },
+  { label: "Level 2 - Managed", value: "level-2" },
+  { label: "Level 3 - Defined", value: "level-3" },
+  { label: "Level 4 - Quantitatively Managed", value: "level-4" },
+  { label: "Level 5 - Optimizing", value: "level-5" },
+];
 
 function overallColor(pct) {
   if (pct < 50) return "#F04438";
@@ -85,11 +120,15 @@ export const Projects = () => {
     { axis: "VV", value: selected.vv },
   ];
 
-  const avg = (key) => Math.round(projects.reduce((sum, p) => sum + p[key], 0) / projects.length);
+  const avg = (key) =>
+    Math.round(projects.reduce((sum, p) => sum + p[key], 0) / projects.length);
 
-  const filteredProjects = projects.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProjects = projects.filter((p) => {
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = status === "all" || p.statusValue === status;
+    const matchesLevel = level === "all" || p.levelValue === level;
+    return matchesSearch && matchesStatus && matchesLevel;
+  });
 
   return (
     <div className={styles.projects}>
@@ -158,57 +197,62 @@ export const Projects = () => {
 
       <div className={styles.mainGrid}>
         <div className={styles.projectList}>
-          {filteredProjects.map((p) => (
-            <Card
-              key={p.id}
-              bordered
-              elevation="none"
-              className={`${styles.projectCard} ${selectedId === p.id ? styles.projectCardActive : ""}`}
-              onClick={() => setSelectedId(p.id)}
-            >
-              <div className={styles.projectCardTop}>
-                <div>
-                  <Text as="h3" className={styles.projectName}>{p.name}</Text>
-                  <Text as="p" color="tertiary" className={styles.projectTeam}>{p.team}</Text>
+          {filteredProjects.length === 0 ? (
+            <Text as="p" color="tertiary">No projects match the current filters.</Text>
+          ) : (
+            filteredProjects.map((p) => (
+              <Card
+                key={p.id}
+                bordered
+                elevation="none"
+                className={`${styles.projectCard} ${selectedId === p.id ? styles.projectCardActive : ""}`}
+                onClick={() => setSelectedId(p.id)}
+              >
+                <div className={styles.projectCardTop}>
+                  <div>
+                    <Text as="h3" className={styles.projectName}>{p.name}</Text>
+                    <Text as="p" color="tertiary" className={styles.projectTeam}>{p.team}</Text>
+                  </div>
+                  <div className={styles.projectBadges}>
+                    <Badge color={p.statusValue === "active" ? "success" : "secondary"} label={p.status} />
+                    <Badge color="secondary" label={p.level} />
+                  </div>
                 </div>
-                <div className={styles.projectBadges}>
-                  <Badge color="success" label={p.status} />
-                  <Badge color="secondary" label={p.level} />
-                </div>
-              </div>
 
-              <div className={styles.projectMetrics}>
-                <div className={styles.metricBox}>
-                  <Text as="p" className={styles.metricLabel}>Peer Review</Text>
-                  <Text as="p" className={styles.metricValue}>{p.peerReview}%</Text>
+                <div className={styles.projectMetrics}>
+                  <div className={styles.metricBox}>
+                    <Text as="p" className={styles.metricLabel}>Peer Review</Text>
+                    <Text as="p" className={styles.metricValue}>{p.peerReview}%</Text>
+                  </div>
+                  <div className={styles.metricBox}>
+                    <Text as="p" className={styles.metricLabel}>PQA</Text>
+                    <Text as="p" className={styles.metricValue}>{p.pqa}%</Text>
+                  </div>
+                  <div className={styles.metricBox}>
+                    <Text as="p" className={styles.metricLabel}>VV</Text>
+                    <Text as="p" className={styles.metricValue}>{p.vv}%</Text>
+                  </div>
                 </div>
-                <div className={styles.metricBox}>
-                  <Text as="p" className={styles.metricLabel}>PQA</Text>
-                  <Text as="p" className={styles.metricValue}>{p.pqa}%</Text>
-                </div>
-                <div className={styles.metricBox}>
-                  <Text as="p" className={styles.metricLabel}>VV</Text>
-                  <Text as="p" className={styles.metricValue}>{p.vv}%</Text>
-                </div>
-              </div>
 
-              <div className={styles.overallRow}>
-                <ProgressBar
-                  value={p.overall}
-                  labelPosition="right"
-                  className={styles.overallBar}
-                  indicatorStyle={{ background: overallColor(p.overall) }}
-                />
-                <Text as="span" color="tertiary" className={styles.overallSuffix}>Overall</Text>
-              </div>
-            </Card>
-          ))}
+                <div className={styles.overallRow}>
+                  <ProgressBar
+                    value={p.overall}
+                    labelPosition="right"
+                    className={styles.overallBar}
+                    trackStyle={{ height: "6px" }}
+                    indicatorStyle={{ background: overallColor(p.overall) }}
+                  />
+                  <Text as="span" color="tertiary" className={styles.overallSuffix}>Overall</Text>
+                </div>
+              </Card>
+            ))
+          )}
         </div>
 
         <Card bordered elevation="elevation-1" className={styles.radarPanel}>
           <CardHeader title={selected.name} description={selected.team} noDivider />
           <CardBody>
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={550}>
               <RadarChart data={radarData} outerRadius="75%">
                 <PolarGrid />
                 <PolarAngleAxis dataKey="axis" tick={{ fontSize: 13, fontWeight: 600 }} />
@@ -221,17 +265,16 @@ export const Projects = () => {
 
       <div className={styles.detailRow}>
         <Card bordered elevation="elevation-1" className={styles.detailCard}>
-          <CardHeader
-            title="Peer Review"
-            noDivider
-            iconRight={<Badge color="primary" label={`${selected.peerReview}%`} />}
-          />
+          <CardHeader title="Peer Review" noDivider iconRight={<Badge color="primary" label={`${selected.peerReview}%`} />} />
           <CardBody>
-            <ProgressBar
-              value={selected.peerReview}
-              labelPosition="bottom-right"
-              indicatorStyle={{ background: "#F59E0B" }}
-            />
+            <div className={styles.progressGap}>
+              <ProgressBar
+                value={selected.peerReview}
+                labelPosition="bottom-right"
+                trackStyle={{ height: "10px", width: "230px" }}
+                indicatorStyle={{ background: "#F59E0B" }}
+              />
+            </div>
             <div className={styles.detailList}>
               <div className={styles.detailItem}><span>Reviews conducted</span><span>{selected.detail.peerReview.reviewsConducted}</span></div>
               <div className={styles.detailItem}><span>Open findings</span><span>{selected.detail.peerReview.openFindings}</span></div>
@@ -242,17 +285,16 @@ export const Projects = () => {
         </Card>
 
         <Card bordered elevation="elevation-1" className={styles.detailCard}>
-          <CardHeader
-            title="Process Quality Assurance"
-            noDivider
-            iconRight={<Badge color="primary" label={`${selected.pqa}%`} />}
-          />
+          <CardHeader title="Process Quality Assurance" noDivider iconRight={<Badge color="primary" label={`${selected.pqa}%`} />} />
           <CardBody>
-            <ProgressBar
-              value={selected.pqa}
-              labelPosition="bottom-right"
-              indicatorStyle={{ background: "#F59E0B" }}
-            />
+            <div className={styles.progressGap}>
+              <ProgressBar
+                value={selected.pqa}
+                labelPosition="bottom-right"
+                trackStyle={{ height: "10px", width: "230px" }}
+                indicatorStyle={{ background: "#F59E0B" }}
+              />
+            </div>
             <div className={styles.detailList}>
               <div className={styles.detailItem}><span>Audits completed</span><span>{selected.detail.pqa.auditsCompleted}</span></div>
               <div className={styles.detailItem}><span>Non-compliances found</span><span>{selected.detail.pqa.nonCompliancesFound}</span></div>
@@ -263,17 +305,16 @@ export const Projects = () => {
         </Card>
 
         <Card bordered elevation="elevation-1" className={styles.detailCard}>
-          <CardHeader
-            title="Verification & Validation"
-            noDivider
-            iconRight={<Badge color="primary" label={`${selected.vv}%`} />}
-          />
+          <CardHeader title="Verification & Validation" noDivider iconRight={<Badge color="primary" label={`${selected.vv}%`} />} />
           <CardBody>
-            <ProgressBar
-              value={selected.vv}
-              labelPosition="bottom-right"
-              indicatorStyle={{ background: "#F59E0B" }}
-            />
+            <div className={styles.progressGap}>
+              <ProgressBar
+                value={selected.vv}
+                labelPosition="bottom-right"
+                trackStyle={{ height: "10px", width: "230px" }}
+                indicatorStyle={{ background: "#F59E0B" }}
+              />
+            </div>
             <div className={styles.detailList}>
               <div className={styles.detailItem}><span>Verification passed</span><span>{selected.detail.vv.verificationPassed}</span></div>
               <div className={styles.detailItem}><span>Validation passed</span><span>{selected.detail.vv.validationPassed}</span></div>

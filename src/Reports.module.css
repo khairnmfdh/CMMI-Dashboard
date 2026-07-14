@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: #FAFAFB;
+  background: #fafafb;
   min-height: 100%;
 }
 
@@ -38,7 +38,7 @@
 }
 
 .statCard {
-  background: linear-gradient(135deg, #2970FF, #4C8DFF) !important;
+  background: linear-gradient(135deg, #875bf7, #6938ef) !important;
   border-radius: 16px !important;
   padding: 22px !important;
   text-align: center;
@@ -47,9 +47,18 @@
   gap: 6px;
 }
 
-.statLabel { font-size: 16px; font-weight: 700; }
-.statValue { font-size: 36px; font-weight: 800; }
-.statSub { font-size: 12px; opacity: 0.9; }
+.statLabel {
+  font-size: 16px;
+  font-weight: 700;
+}
+.statValue {
+  font-size: 36px;
+  font-weight: 800;
+}
+.statSub {
+  font-size: 12px;
+  opacity: 0.9;
+}
 
 .chartsRow {
   display: grid;
@@ -79,7 +88,54 @@
   color: #101828;
 }
 
-@media (max-width: 1000px) {
-  .chartsRow { grid-template-columns: 1fr; }
-  .statsRow { grid-template-columns: repeat(2, 1fr); }
+.printHeader {
+  display: none;
+}
+
+/* Print-only rules: hide app chrome, show only the report */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .reports,
+  .reports * {
+    visibility: visible;
+  }
+
+  .reports {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0;
+    background: #fff;
+  }
+
+  /* Hide the filter row and download button — not needed in the printed report */
+  .filterRow {
+    display: none !important;
+  }
+
+  .statCard {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    break-inside: avoid;
+  }
+
+  .chartCard,
+  .tablePanel {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #e4e7ec !important;
+  }
+
+  .chartsRow {
+    display: block;
+  }
+
+  .chartCard {
+    margin-bottom: 16px;
+    margin-left: 20px;
+  }
 }

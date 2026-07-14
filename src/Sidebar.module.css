@@ -1,3 +1,23 @@
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0px 18px 24px;
+}
+
+.logoImage {
+  width: 200px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.logoText {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  white-space: nowrap;
+}
 .sidebarWrapper {
   width: 260px;
   flex-shrink: 0;
@@ -43,21 +63,19 @@
 
 /* Real, confirmed active-state classes (via Legion's own props) */
 .activeMenu {
-  background-color: #ffffff !important;
   border-radius: 12px;
 }
 
 .activeMenu * {
-  color: #0F2A73 !important;
+  color: #ffff !important;
 }
 
 .activeSubMenu {
-  background-color: #ffffff !important;
   border-radius: 12px;
 }
 
 .activeSubMenu * {
-  color: #0F2A73 !important;
+  color: #ffff !important;
 }
 
 .sidebarWrapper :global(p) {
