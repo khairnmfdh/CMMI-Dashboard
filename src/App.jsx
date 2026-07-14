@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import Sidebar from "./sidebar";
 import Header from "./header";
@@ -16,8 +16,15 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authView, setAuthView] = useState("signin");
   const [activeLabel, setActiveLabel] = useState("Home");
+  const [theme, setTheme] = useState("light");
 
-  // if (!user) return <AuthLanding onLogin={setUser} />;
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
 
   const renderPage = () => {
     switch (activeLabel) {
@@ -67,6 +74,8 @@ function App() {
       >
         <Header
           breadcrumbLabel={activeLabel === "Home" ? "Dashboard" : activeLabel}
+          toggleTheme={toggleTheme}
+          theme={theme}
         />
         <div style={{ padding: "24px", overflowY: "auto" }}>{renderPage()}</div>
       </div>

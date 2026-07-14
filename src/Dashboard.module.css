@@ -3,7 +3,6 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: #FAFAFB;
   min-height: 100%;
 }
 
@@ -19,12 +18,18 @@
 }
 
 .processSelectInputWrapper {
-  background: linear-gradient(135deg, #875BF7, #6938EF) !important;
+  background: var(--gradient-primary) !important;
   border-radius: 999px !important;
   padding: 10px 18px !important;
-  box-shadow: 0 4px 10px rgba(105, 56, 239, 0.25);
+  box-shadow: var(--gradient-glow);
   cursor: pointer;
   border: none !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.processSelectInputWrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -5px rgba(135, 91, 247, 0.4);
 }
 
 .processSelectInput {
@@ -44,7 +49,7 @@
 }
 
 .statCard {
-  background: linear-gradient(135deg, #2970FF, #875BF7);
+  background: var(--gradient-primary);
   border-radius: 16px;
   padding: 22px;
   color: #fff;
@@ -52,6 +57,28 @@
   flex-direction: column;
   gap: 8px;
   min-height: 130px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.statCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--gradient-glow);
+}
+
+.statCard:hover::before {
+  opacity: 1;
 }
 
 .statLabel {
@@ -59,6 +86,8 @@
   font-weight: 700;
   opacity: 0.95;
   color: #fff;
+  position: relative;
+  z-index: 1;
 }
 
 .statValue {
@@ -66,20 +95,34 @@
   font-weight: 800;
   margin-top: auto;
   color: #fff;
+  position: relative;
+  z-index: 1;
 }
 
 .statSub {
   font-size: 12px;
   opacity: 0.85;
   color: #fff;
+  position: relative;
+  z-index: 1;
 }
 
 /* Shared panel shell */
 .panel {
-  background: #EAF0FF;
-  border: 1px solid #E4E7EC;
+  background: var(--glass-panel) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-glass) !important;
   border-radius: 16px;
   padding: 20px 22px;
+  box-shadow: var(--shadow-md) !important;
+  transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.panel:hover {
+  background: var(--glass-hover) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -5px rgba(0,0,0,0.1) !important;
 }
 
 .panelHeader {

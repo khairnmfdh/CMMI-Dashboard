@@ -9,42 +9,48 @@
 
 :root {
   /* LIGHT THEME VARIABLES */
-  --bg-app: #f4f7f6;
+  --bg-app: #F8FAFC;
   --bg-panel: #ffffff;
   --bg-sidebar: #0F2A73;
   --bg-header: #ffffff;
-  --bg-input: #F7F7FB;
-  --border-main: #E4E7EC;
-  --text-primary: #101828;
-  --text-secondary: #64748b;
-  --text-muted: #98A2B3;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.05);
-  --glass-panel: #ffffff;
-  --glass-border: #E4E7EC;
-  --glass-hover: #f8fafc;
+  --bg-input: #F1F5F9;
+  --border-main: #E2E8F0;
+  --border-glass: rgba(255, 255, 255, 0.5);
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01);
+  --glass-panel: rgba(255, 255, 255, 0.7);
+  --glass-blur: blur(12px);
+  --glass-hover: rgba(255, 255, 255, 0.9);
   --sidebar-text: #ffffff;
   --sidebar-hover: rgba(255, 255, 255, 0.1);
+  --gradient-primary: linear-gradient(135deg, #2970FF 0%, #875BF7 100%);
+  --gradient-glow: 0 10px 20px -5px rgba(135, 91, 247, 0.3);
 }
 
 [data-theme="dark"] {
   /* DARK THEME VARIABLES */
-  --bg-app: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #020617 70%);
-  --bg-panel: rgba(30, 41, 59, 0.4);
-  --bg-sidebar: rgba(15, 23, 42, 0.5);
-  --bg-header: rgba(15, 23, 42, 0.4);
+  --bg-app: radial-gradient(circle at 50% 0%, #0F172A 0%, #020617 100%);
+  --bg-panel: rgba(15, 23, 42, 0.6);
+  --bg-sidebar: rgba(2, 6, 23, 0.7);
+  --bg-header: rgba(15, 23, 42, 0.5);
   --bg-input: rgba(255, 255, 255, 0.05);
-  --border-main: rgba(255, 255, 255, 0.05);
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --shadow-sm: 0 4px 15px rgba(0,0,0,0.2);
-  --shadow-md: 0 8px 32px rgba(0,0,0,0.2);
-  --glass-panel: rgba(30, 41, 59, 0.4);
-  --glass-border: rgba(255, 255, 255, 0.05);
-  --glass-hover: rgba(255, 255, 255, 0.08);
-  --sidebar-text: #cbd5e1;
+  --border-main: rgba(255, 255, 255, 0.1);
+  --border-glass: rgba(255, 255, 255, 0.05);
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0,0,0,0.3);
+  --glass-panel: rgba(30, 41, 59, 0.5);
+  --glass-blur: blur(16px);
+  --glass-hover: rgba(30, 41, 59, 0.8);
+  --sidebar-text: #F8FAFC;
   --sidebar-hover: rgba(255, 255, 255, 0.05);
+  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #A855F7 100%);
+  --gradient-glow: 0 10px 25px -5px rgba(168, 85, 247, 0.4);
 }
 
 html, body, #root {

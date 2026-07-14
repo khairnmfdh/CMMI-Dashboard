@@ -7,6 +7,8 @@ export const Header = ({
   onSettingsClick,
   onProfileClick,
   breadcrumbLabel = "Dashboard",
+  toggleTheme,
+  theme,
 }) => {
   return (
     <header className="header">
@@ -31,6 +33,11 @@ export const Header = ({
           <span className="search-icon">⌕</span>
           <input className="search-input" placeholder="Search....." />
         </div>
+        
+        <button className="header-icon-btn theme-toggle" onClick={toggleTheme} title="Toggle Theme">
+          {theme === "light" ? "🌙" : "☀️"}
+        </button>
+
         <button className="bell-btn">🔔</button>
 
         <button className="header-icon-btn" onClick={onSettingsClick}>
