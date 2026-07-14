@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -11,6 +10,7 @@ import {
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
+  PolarRadiusAxis,
   Radar,
 } from "recharts";
 import {
@@ -23,6 +23,78 @@ import {
   ProgressBar,
 } from "@legion-ui-kit/react-core";
 import styles from "../Projects.module.css";
+
+const projects = [
+  {
+    id: "netmonk",
+    name: "NETMONK",
+    team: "Tribe Netmonk",
+    status: "Active",
+    statusValue: "active",
+    level: "Level 3",
+    levelValue: "level-3",
+    peerReview: 83,
+    pqa: 100,
+    vv: 100,
+    prCount: 5,
+    pqaCount: 6,
+    vvCount: 7,
+    overall: 95,
+    detail: {
+      peerReview: { reviewsConducted: 6, openFindings: 1, closeFindings: 5, practicesMet: "5/6" },
+      pqa: { auditsCompleted: 6, nonCompliancesFound: 0, processAdherence: "100%", lastAudit: "2026-06-10" },
+      vv: { verificationPassed: "7/7", validationPassed: "7/7", testCoverage: "100%" },
+    },
+  },
+  {
+    id: "padi-umkm",
+    name: "PaDi UMKM",
+    team: "Tribe PaDi UMKM",
+    status: "Active",
+    statusValue: "active",
+    level: "Level 3",
+    levelValue: "level-3",
+    peerReview: 83,
+    pqa: 100,
+    vv: 100,
+    prCount: 5,
+    pqaCount: 6,
+    vvCount: 7,
+    overall: 95,
+    detail: {
+      peerReview: { reviewsConducted: 6, openFindings: 0, closeFindings: 6, practicesMet: "5/6" },
+      pqa: { auditsCompleted: 6, nonCompliancesFound: 0, processAdherence: "100%", lastAudit: "2026-06-12" },
+      vv: { verificationPassed: "7/7", validationPassed: "7/7", testCoverage: "100%" },
+    },
+  },
+  {
+    id: "legion-ai",
+    name: "Legion AI",
+    team: "Tribe Legion AI",
+    status: "Active",
+    statusValue: "active",
+    level: "Level 3",
+    levelValue: "level-3",
+    peerReview: 83,
+    pqa: 83,
+    vv: 100,
+    prCount: 5,
+    pqaCount: 5,
+    vvCount: 7,
+    overall: 89,
+    detail: {
+      peerReview: { reviewsConducted: 6, openFindings: 1, closeFindings: 5, practicesMet: "5/6" },
+      pqa: { auditsCompleted: 6, nonCompliancesFound: 1, processAdherence: "83%", lastAudit: "2026-06-14" },
+      vv: { verificationPassed: "7/7", validationPassed: "7/7", testCoverage: "100%" },
+    },
+  },
+];
+
+const chartData = [
+  { name: "Netmonk", "Peer Review": 5, "Process QA": 6, "V&V": 7 },
+  { name: "PaDi UMKM", "Peer Review": 5, "Process QA": 6, "V&V": 7 },
+  { name: "Legion AI", "Peer Review": 5, "Process QA": 5, "V&V": 7 },
+];
 
 const statusOptions = [
   { label: "All Statuses", value: "all" },
@@ -45,116 +117,21 @@ function overallColor(pct) {
   return "#12B76A";
 }
 
-function getPct(achieved, target) {
-  if (!target) return 0;
-  return Math.floor((achieved / target) * 100);
-}
-
 export const Projects = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [level, setLevel] = useState("all");
-  
-  const [projects, setProjects] = useState([]);
-  const [metrics, setMetrics] = useState(null);
-  const [chartData, setChartData] = useState([]);
-  const [selectedId, setSelectedId] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState(projects[0].id);
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const res = await axios.get("http://localhost:8080/api/v1/projects/cmmi-details");
-        const data = res.data.data;
-        
-        let sumPr = 0, sumPqa = 0, sumVv = 0;
-
-        const combinedProjects = data.projects.map((p) => {
-          const b = data.breakdowns;
-          
-          const prScore = p.pr_achieved;
-          const pqaScore = p.pqa_achieved;
-          const vvScore = p.vv_achieved;
-          const overallScore = p.overall_achieved;
-          
-          sumPr += getPct(prScore, p.pr_target);
-          sumPqa += getPct(pqaScore, p.pqa_target);
-          sumVv += getPct(vvScore, p.vv_target);
-
-          return {
-            id: p.name.toLowerCase().replace(/ /g, "-"),
-            name: p.name,
-            team: p.team,
-            status: p.status,
-            statusValue: p.status.toLowerCase().includes('inactive') ? 'inactive' : 'active',
-            level: p.level,
-            levelValue: 'level-3', // Simplified
-            peerReview: getPct(prScore, p.pr_target),
-            pqa: getPct(pqaScore, p.pqa_target),
-            vv: getPct(vvScore, p.vv_target),
-            overall: getPct(overallScore, p.overall_target),
-            prTarget: p.pr_target,
-            pqaTarget: p.pqa_target,
-            vvTarget: p.vv_target,
-            overallTarget: p.overall_target,
-            detail: {
-              peerReview: {
-                reviewsConducted: b[0]?.details["Reviews conducted"] || p.pr_achieved,
-                openFindings: b[0]?.details["Open findings"] || 0,
-                closeFindings: b[0]?.details["Close findings"] || 0,
-                practicesMet: `${p.pr_achieved}/${p.pr_target}`
-              },
-              pqa: {
-                auditsCompleted: b[1]?.details["Audits completed"] || p.pqa_achieved,
-                nonCompliancesFound: b[1]?.details["Non-compliances found"] || 0,
-                processAdherence: `${p.pqa_achieved}/${p.pqa_target}`,
-                lastAudit: b[1]?.details["Last audit"] || "N/A"
-              },
-              vv: {
-                verificationPassed: b[2]?.details["Verification passed"] || p.vv_achieved,
-                validationPassed: b[2]?.details["Validation passed"] || p.vv_achieved,
-                testCoverage: b[2]?.details["Test coverage"] || "100%"
-              }
-            }
-          };
-        });
-
-        const count = combinedProjects.length || 1;
-
-        setProjects(combinedProjects);
-        setMetrics({
-          total_projects: data.total_projects,
-          avg_pr: Math.round(sumPr / count),
-          avg_pqa: Math.round(sumPqa / count),
-          avg_vv: Math.round(sumVv / count)
-        });
-        
-        const newChartData = combinedProjects.map(p => ({
-          name: p.name,
-          "Peer Review": p.peerReview * 100, // scaled up for chart look
-          "Process QA": p.pqa * 100,
-          "V&V": p.vv * 100
-        }));
-        setChartData(newChartData);
-        setSelectedId(combinedProjects[0]?.id || "");
-      } catch (err) {
-        console.error("Failed to fetch projects", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProjects();
-  }, []);
-
-  if (loading) return <div style={{ padding: 40, color: "var(--text-primary)" }}>Loading Projects...</div>;
-  if (!projects.length) return <div style={{ padding: 40, color: "var(--text-primary)" }}>Failed to load data.</div>;
-
-  const selected = projects.find((p) => p.id === selectedId) || projects[0];
+  const selected = projects.find((p) => p.id === selectedId);
   const radarData = [
-    { axis: "PR", value: selected.peerReview },
-    { axis: "PQA", value: selected.pqa },
-    { axis: "VV", value: selected.vv },
+    { axis: "PR", value: selected.prCount },
+    { axis: "PQA", value: selected.pqaCount },
+    { axis: "VV", value: selected.vvCount },
   ];
+
+  const avg = (key) =>
+    Math.round(projects.reduce((sum, p) => sum + p[key], 0) / projects.length);
 
   const filteredProjects = projects.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
@@ -168,23 +145,23 @@ export const Projects = () => {
       <div className={styles.statsRow}>
         <Card className={styles.statCard} elevation="none">
           <Text as="p" color="white" className={styles.statLabel}>Total Projects</Text>
-          <Text as="h2" color="white" className={styles.statValue}>{metrics?.total_projects}</Text>
+          <Text as="h2" color="white" className={styles.statValue}>{projects.length}</Text>
           <Text as="p" color="white" className={styles.statSub}>Overall CMMI Score · Level 3</Text>
         </Card>
         <Card className={styles.statCard} elevation="none">
           <Text as="p" color="white" className={styles.statLabel}>Avg Peer Review</Text>
-          <Text as="h2" color="white" className={styles.statValue}>{metrics?.avg_pr}%</Text>
-          <Text as="p" color="white" className={styles.statSub}>Average Score</Text>
+          <Text as="h2" color="white" className={styles.statValue}>{avg("peerReview")}%</Text>
+          <Text as="p" color="white" className={styles.statSub}>15/18 practices met</Text>
         </Card>
         <Card className={styles.statCard} elevation="none">
           <Text as="p" color="white" className={styles.statLabel}>Avg PQA Score</Text>
-          <Text as="h2" color="white" className={styles.statValue}>{metrics?.avg_pqa}%</Text>
-          <Text as="p" color="white" className={styles.statSub}>Average Score</Text>
+          <Text as="h2" color="white" className={styles.statValue}>{avg("pqa")}%</Text>
+          <Text as="p" color="white" className={styles.statSub}>17/18 practices met</Text>
         </Card>
         <Card className={styles.statCard} elevation="none">
           <Text as="p" color="white" className={styles.statLabel}>Avg V&V Score</Text>
-          <Text as="h2" color="white" className={styles.statValue}>{metrics?.avg_vv}%</Text>
-          <Text as="p" color="white" className={styles.statSub}>Average Score</Text>
+          <Text as="h2" color="white" className={styles.statValue}>{avg("vv")}%</Text>
+          <Text as="p" color="white" className={styles.statSub}>21/21 practices met</Text>
         </Card>
       </div>
 
@@ -218,7 +195,7 @@ export const Projects = () => {
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis tickFormatter={(v) => `${v / 1000}k`} tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
               <Tooltip />
               <Bar dataKey="Peer Review" fill="#F59E0B" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Process QA" fill="#F04438" radius={[4, 4, 0, 0]} />
@@ -270,12 +247,14 @@ export const Projects = () => {
                 <div className={styles.overallRow}>
                   <ProgressBar
                     value={p.overall}
-                    labelPosition="right"
+                    labelPosition="none"
                     className={styles.overallBar}
                     trackStyle={{ height: "6px" }}
                     indicatorStyle={{ background: overallColor(p.overall) }}
                   />
-                  <Text as="span" color="tertiary" className={styles.overallSuffix}>Overall</Text>
+                  <div className={styles.overallSuffix}>
+                    <strong>{p.overall}%</strong> Overall
+                  </div>
                 </div>
               </Card>
             ))
@@ -286,9 +265,10 @@ export const Projects = () => {
           <CardHeader title={selected.name} description={selected.team} noDivider />
           <CardBody>
             <ResponsiveContainer width="100%" height={550}>
-              <RadarChart data={radarData} outerRadius="75%">
+              <RadarChart data={radarData}>
                 <PolarGrid />
                 <PolarAngleAxis dataKey="axis" tick={{ fontSize: 13, fontWeight: 600 }} />
+                <PolarRadiusAxis domain={[0, 7]} tick={false} axisLine={false} />
                 <Radar dataKey="value" stroke="#12B76A" fill="#12B76A" fillOpacity={0.35} />
               </RadarChart>
             </ResponsiveContainer>
