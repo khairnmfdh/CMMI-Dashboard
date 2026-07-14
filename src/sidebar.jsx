@@ -1,4 +1,5 @@
 import { Sidebar as SidebarComponent } from "@legion-ui-kit/react-core";
+import cmmiLogo from "./assets/logo2.png";
 import styles from "./Sidebar.module.css";
 
 const IconDashboard = () => (
@@ -57,10 +58,10 @@ export default function AppSidebar({ activeLabel, onNavigate }) {
         label: (
           <span className={styles.menuLabel} onClick={() => onNavigate("Projects")}>
             <IconProjects />
-            Projects
+            Products
           </span>
         ),
-        isActive: activeLabel === "Projects",
+        isActive: activeLabel === "Products",
       },
     },
     {
@@ -86,10 +87,7 @@ export default function AppSidebar({ activeLabel, onNavigate }) {
       subMenu: [
         {
           label: (
-            <p
-              style={{ whiteSpace: "nowrap" }}
-              onClick={() => onNavigate("Peer Review")}
-            >
+            <p style={{ whiteSpace: "nowrap" }} onClick={() => onNavigate("Peer Review")}>
               Peer Review
             </p>
           ),
@@ -97,10 +95,7 @@ export default function AppSidebar({ activeLabel, onNavigate }) {
         },
         {
           label: (
-            <p
-              style={{ whiteSpace: "nowrap" }}
-              onClick={() => onNavigate("Software Quality Assurance")}
-            >
+            <p style={{ whiteSpace: "nowrap" }} onClick={() => onNavigate("Software Quality Assurance")}>
               Software Quality Assurance
             </p>
           ),
@@ -108,10 +103,7 @@ export default function AppSidebar({ activeLabel, onNavigate }) {
         },
         {
           label: (
-            <p
-              style={{ whiteSpace: "nowrap" }}
-              onClick={() => onNavigate("Validation and Verification")}
-            >
+            <p style={{ whiteSpace: "nowrap" }} onClick={() => onNavigate("Validation and Verification")}>
               Validation and Verification
             </p>
           ),
@@ -134,6 +126,10 @@ export default function AppSidebar({ activeLabel, onNavigate }) {
 
   return (
     <div className={styles.sidebarWrapper}>
+      <div className={styles.logoSection}>
+        <img src={cmmiLogo} alt="CMMI Dashboard" className={styles.logoImage} />
+      </div>
+
       <SidebarComponent
         listMenu={listMenu}
         mainMenuClassName={styles.mainMenu}

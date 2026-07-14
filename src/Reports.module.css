@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: var(--bg-app);
+  background: #fafafb;
   min-height: 100%;
 }
 
@@ -20,24 +20,15 @@
   gap: 10px;
 }
 
-.downloadBtn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #2970FF;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.filterSelectWrapper {
+  border-radius: 999px !important;
+  padding: 8px 16px !important;
 }
 
-.downloadBtn:hover {
-  background: #1D5FE0;
-  transform: translateY(-2px);
+.filterSelectInput {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
 }
 
 .statsRow {
@@ -47,20 +38,27 @@
 }
 
 .statCard {
-  background: linear-gradient(135deg, #2970FF, #4C8DFF) !important;
+  background: linear-gradient(135deg, #875bf7, #6938ef) !important;
   border-radius: 16px !important;
   padding: 22px !important;
-  color: #fff !important;
   text-align: center;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  box-shadow: var(--shadow-sm) !important;
 }
 
-.statLabel { font-size: 16px; font-weight: 700; }
-.statValue { font-size: 36px; font-weight: 800; }
-.statSub { font-size: 12px; opacity: 0.9; }
+.statLabel {
+  font-size: 16px;
+  font-weight: 700;
+}
+.statValue {
+  font-size: 36px;
+  font-weight: 800;
+}
+.statSub {
+  font-size: 12px;
+  opacity: 0.9;
+}
 
 .chartsRow {
   display: grid;
@@ -69,83 +67,75 @@
 }
 
 .chartCard {
-  background: var(--glass-panel) !important;
-  border: 1px solid var(--glass-border) !important;
-  border-radius: 16px !important;
-  padding: 20px !important;
-  box-shadow: var(--shadow-sm) !important;
-}
-
-.chartTitle {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--text-primary) !important;
-  margin-bottom: 12px;
+  background: #fff;
 }
 
 .legendLabel {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: #475467;
 }
 
 .tablePanel {
-  background: var(--glass-panel) !important;
-  border: 1px solid var(--glass-border) !important;
-  border-radius: 16px !important;
-  padding: 20px !important;
-  box-shadow: var(--shadow-sm) !important;
-}
-
-.tableTitle {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--text-primary) !important;
-  margin-bottom: 16px;
+  background: #fff;
 }
 
 .table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.table th {
-  text-align: left;
-  padding: 10px 12px;
-  color: var(--text-muted);
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.03em;
-  border-bottom: 2px solid var(--border-main);
-}
-
-.table td {
-  padding: 14px 12px;
-  border-bottom: 1px solid var(--glass-border);
-  color: var(--text-secondary);
-}
-
-.table tr:hover td {
-  background: var(--glass-hover);
 }
 
 .idCell {
   font-weight: 700;
-  color: var(--text-primary) !important;
+  color: #101828;
 }
 
-.statusPill {
-  display: inline-block;
-  padding: 3px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
+.printHeader {
+  display: none;
 }
 
-.statusDone { background: rgba(18, 183, 106, 0.15); color: #32d583; }
-.statusInProgress { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+/* Print-only rules: hide app chrome, show only the report */
+@media print {
+  body * {
+    visibility: hidden;
+  }
 
-@media (max-width: 1000px) {
-  .chartsRow { grid-template-columns: 1fr; }
-  .statsRow { grid-template-columns: repeat(2, 1fr); }
+  .reports,
+  .reports * {
+    visibility: visible;
+  }
+
+  .reports {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0;
+    background: #fff;
+  }
+
+  /* Hide the filter row and download button — not needed in the printed report */
+  .filterRow {
+    display: none !important;
+  }
+
+  .statCard {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    break-inside: avoid;
+  }
+
+  .chartCard,
+  .tablePanel {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #e4e7ec !important;
+  }
+
+  .chartsRow {
+    display: block;
+  }
+
+  .chartCard {
+    margin-bottom: 16px;
+    margin-left: 20px;
+  }
 }

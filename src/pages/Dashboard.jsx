@@ -1,7 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { Card, Text, ProgressBar, Divider, Select } from "@legion-ui-kit/react-core";
+import {
+  Card,
+  Text,
+  ProgressBar,
+  Divider,
+  Select,
+} from "@legion-ui-kit/react-core";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
 import styles from "../Dashboard.module.css";
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
 
 const processAreaOptions = [
   { label: "All Process Area", value: "all" },
@@ -10,13 +28,40 @@ const processAreaOptions = [
   { label: "Verification & Validation", value: "vv" },
 ];
 
+const WEAKNESS_COLORS = ["#4F46E5", "#6366F1", "#818CF8"];
+const PROJECT_NAMES = ["Netmonk", "PaDi UMKM", "Legion AI"];
+const PROJECT_WEIGHTS = [1 / 2, 2 / 7, 3 / 14];
+
+function splitByProject(total) {
+  const raw = PROJECT_WEIGHTS.map((w) => total * w);
+  const floors = raw.map(Math.floor);
+  const used = floors.reduce((a, b) => a + b, 0);
+  let remainder = total - used;
+
+  const order = raw
+    .map((r, i) => ({ i, frac: r - floors[i] }))
+    .sort((a, b) => b.frac - a.frac);
+
+  const result = [...floors];
+  for (let k = 0; k < remainder; k++) {
+    result[order[k].i] += 1;
+  }
+  return result; // [netmonkCount, padiCount, legionCount]
+}
+
+function niceMax(value) {
+  if (value <= 10) return Math.ceil(value / 2) * 2 || 2;
+  if (value <= 25) return Math.ceil(value / 5) * 5;
+  return Math.ceil(value / 10) * 10;
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+
 export const Dashboard = () => {
   const [selectedArea, setSelectedArea] = useState("all");
   const [data, setData] = useState(null);
   const [chartGroups, setChartGroups] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const maxChartVal = 25000;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,6 +81,35 @@ export const Dashboard = () => {
     fetchData();
   }, []);
 
+  // Compute derived state for charts using useMemo based on chartGroups
+  const practiceStatusData = useMemo(() => {
+    if (!chartGroups.length) return [];
+    return chartGroups.map((g) => ({
+      name: g.tribe,
+      Achieved: g.approved,
+      Partial: g.pending,
+      NotAchieved: g.rejected,
+    }));
+  }, [chartGroups]);
+
+  const weaknessData = useMemo(() => {
+    if (!chartGroups.length) return [];
+    return chartGroups.map((g) => ({
+      name: g.tribe,
+      value: g.rejected,
+    }));
+  }, [chartGroups]);
+
+  const practiceMax = niceMax(
+    Math.max(...practiceStatusData.flatMap((d) => [d.Achieved, d.Partial, d.NotAchieved]), 1)
+  );
+  const weaknessMax = niceMax(Math.max(...weaknessData.map((d) => d.value), 1));
+  const weaknessStep = weaknessMax <= 10 ? 2 : weaknessMax <= 25 ? 5 : 10;
+  const weaknessTicks = Array.from(
+    { length: Math.floor(weaknessMax / weaknessStep) + 1 },
+    (_, i) => i * weaknessStep
+  );
+
   if (loading) return <div style={{ padding: 40, color: "white" }}>Loading Dashboard...</div>;
   if (!data) return <div style={{ padding: 40, color: "white" }}>Failed to load data.</div>;
 
@@ -49,27 +123,27 @@ export const Dashboard = () => {
     }))
   ];
 
-  const assessmentProgress = data.process_areas.map(pa => ({
-    label: pa.name,
-    pct: pa.score
+  // We mock the PIID Result based on the overall data for now
+  const piidResults = [
+    { count: data.process_areas[0]?.met || 0, label: "Achieved", tone: "achieved" },
+    { count: Math.floor((data.process_areas[0]?.total || 0) * 0.2), label: "Partially Achieved", tone: "partial" },
+    { count: Math.floor((data.process_areas[0]?.total || 0) * 0.3), label: "Not Achieved", tone: "notAchieved" },
+  ];
+  
+  const productProcessArea = chartGroups.map(g => ({
+    label: g.tribe,
+    pct: Math.floor((g.approved / (g.approved + g.pending + g.rejected)) * 100) || 0
   }));
 
-  const upcomingReviews = data.upcoming_schedules.map(sch => {
-    const parts = sch.date.split(" ");
-    return {
-      day: parts[0],
-      month: parts[1] || "",
-      label: sch.title
-    };
-  });
-
-  const recentActivities = data.recent_activities.map(act => ({
+  const recentActivities = data.recent_activities.map((act, i) => ({
+    id: i,
     time: act.time,
     text: act.description
   }));
 
   return (
     <div className={styles.dashboard}>
+      {/* ── Filter row ── */}
       <div className={styles.filterRow}>
         <Select
           options={processAreaOptions}
@@ -81,27 +155,37 @@ export const Dashboard = () => {
         />
       </div>
 
+      {/* ── Stat cards ── */}
       <div className={styles.statsRow}>
         {statCards.map((stat) => (
           <Card key={stat.label} className={styles.statCard}>
-            <Text as="p" color="white" className={styles.statLabel}>{stat.label}</Text>
-            <Text as="h2" color="white" className={styles.statValue}>{stat.value}</Text>
-            <Text as="p" color="white" className={styles.statSub}>{stat.sub}</Text>
+            <Text as="p" color="white" className={styles.statLabel}>
+              {stat.label}
+            </Text>
+            <Text as="h2" color="white" className={styles.statValue}>
+              {stat.value}
+            </Text>
+            <Text as="p" color="white" className={styles.statSub}>
+              {stat.sub}
+            </Text>
           </Card>
         ))}
       </div>
 
+      {/* ── Mid grid ── */}
       <div className={styles.midGrid}>
         <Card className={styles.panel}>
           <div className={styles.panelHeader}>
-            <Text as="h3" variant="heading">Assesment Progress</Text>
-            <a className={styles.viewAllLink} href="#">View All →</a>
+            <Text as="h3" variant="heading">
+              Product Process Area
+            </Text>
           </div>
-
           <div className={styles.progressList}>
-            {assessmentProgress.map((item) => (
+            {productProcessArea.map((item) => (
               <div key={item.label} className={styles.progressItem}>
-                <Text as="p" className={styles.progressLabel}>{item.label}</Text>
+                <Text as="p" className={styles.progressLabel}>
+                  {item.label}
+                </Text>
                 <ProgressBar value={item.pct} color="warning" />
               </div>
             ))}
@@ -109,27 +193,40 @@ export const Dashboard = () => {
         </Card>
 
         <Card className={styles.panel}>
-          <Text as="h3" variant="heading">Upcoming Review Schedule</Text>
-          <div className={styles.scheduleList}>
-            {upcomingReviews.map((item, i) => (
-              <div key={i} className={styles.scheduleItem}>
-                <div className={styles.scheduleDateBadge}>
-                  <span className={styles.scheduleDay}>{item.day}</span>
-                  <span className={styles.scheduleMonth}>{item.month}</span>
-                </div>
-                <Text as="span" className={styles.scheduleLabel}>{item.label}</Text>
+          <div className={styles.panelHeader}>
+            <Text as="h3" variant="heading">
+              PIID Result
+            </Text>
+          </div>
+          <div className={styles.piidList}>
+            {piidResults.map((item) => (
+              <div key={item.label} className={styles.piidItem}>
+                <span
+                  className={`${styles.piidBadge} ${styles[`piidBadge_${item.tone}`]}`}
+                >
+                  {item.count}
+                </span>
+                <Text as="span" className={styles.piidLabel}>
+                  {item.label}
+                </Text>
               </div>
             ))}
           </div>
         </Card>
       </div>
 
+      {/* ── Bottom grid ── */}
       <div className={styles.bottomGrid}>
         <Card className={styles.panel}>
-          <Text as="h3" variant="heading">Recent Assessment Activities</Text>
+          <div className={styles.panelHeader}>
+            <Text as="h3" variant="heading">
+              Recent Assessment Activities
+            </Text>
+          </div>
+
           <div className={styles.timeline}>
             {recentActivities.map((activity, i) => (
-              <div key={i} className={styles.timelineItem}>
+              <div key={activity.id} className={styles.timelineItem}>
                 <div className={styles.timelineDotCol}>
                   <span className={styles.timelineDot} />
                   {i < recentActivities.length - 1 && (
@@ -137,8 +234,12 @@ export const Dashboard = () => {
                   )}
                 </div>
                 <div className={styles.timelineContent}>
-                  <Text as="p" className={styles.timelineTime}>{activity.time}</Text>
-                  <Text as="p" className={styles.timelineText}>{activity.text}</Text>
+                  <Text as="p" className={styles.timelineTime}>
+                    {activity.time}
+                  </Text>
+                  <Text as="p" className={styles.timelineText}>
+                    {activity.text}
+                  </Text>
                 </div>
                 {i < recentActivities.length - 1 && <Divider />}
               </div>
@@ -146,57 +247,148 @@ export const Dashboard = () => {
           </div>
         </Card>
 
-        <Card className={styles.panel}>
-          <Text as="h3" variant="heading">Artifacts Review Progress</Text>
-
-          <div className={styles.chartWrapper}>
-            <div className={styles.chartYAxis}>
-              <span>25k</span>
-              <span>20k</span>
-              <span>15k</span>
-              <span>10k</span>
-              <span>5k</span>
-              <span>0</span>
+        <div className={styles.bottomRightCol}>
+          {/* Practice Status Distribution */}
+          <Card className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <Text as="h3" variant="heading">
+                Practice Status Distribution
+              </Text>
             </div>
 
-            <div className={styles.chartBody}>
-              {chartGroups.map((group) => (
-                <div key={group.tribe} className={styles.chartGroup}>
-                  <div className={styles.chartBars}>
-                    <div
-                      className={`${styles.chartBar} ${styles.chartBarRejected}`}
-                      style={{ height: `${(group.rejected / maxChartVal) * 100}%` }}
-                    />
-                    <div
-                      className={`${styles.chartBar} ${styles.chartBarPending}`}
-                      style={{ height: `${(group.pending / maxChartVal) * 100}%` }}
-                    />
-                    <div
-                      className={`${styles.chartBar} ${styles.chartBarApproved}`}
-                      style={{ height: `${(group.approved / maxChartVal) * 100}%` }}
-                    />
-                  </div>
-                  <Text as="span" className={styles.chartGroupLabel}>{group.tribe}</Text>
-                </div>
-              ))}
-            </div>
-          </div>
+            <ResponsiveContainer width="100%" height={285}>
+              <BarChart
+                data={practiceStatusData}
+                barSize={16}
+                barGap={4}
+                margin={{ top: 9, right: 0, left: -20, bottom: 4 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#E4E7EC"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 12, fill: "#667085", fontWeight: 600 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  domain={[0, practiceMax]}
+                  tick={{ fontSize: 11, fill: "#667085" }}
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    fontSize: 12,
+                    borderRadius: 8,
+                    border: "1px solid #E4E7EC",
+                    background: "#fff",
+                  }}
+                />
+                <Bar
+                  dataKey="Achieved"
+                  name="Achieved"
+                  fill="#12B76A"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="Partial"
+                  name="Partial"
+                  fill="#F59E0B"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="NotAchieved"
+                  name="Not Achieved"
+                  fill="#F04438"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
 
-          <div className={styles.chartLegend}>
-            <span className={styles.legendItem}>
-              <span className={`${styles.legendDot} ${styles.legendDotApproved}`} />
-              Approved
-            </span>
-            <span className={styles.legendItem}>
-              <span className={`${styles.legendDot} ${styles.legendDotPending}`} />
-              Pending
-            </span>
-            <span className={styles.legendItem}>
-              <span className={`${styles.legendDot} ${styles.legendDotRejected}`} />
-              Rejected
-            </span>
-          </div>
-        </Card>
+            <div className={styles.chartLegend}>
+              <span className={styles.legendItem}>
+                <span
+                  className={`${styles.legendDot} ${styles.legendDotApproved}`}
+                />
+                Achieved
+              </span>
+              <span className={styles.legendItem}>
+                <span
+                  className={`${styles.legendDot} ${styles.legendDotPending}`}
+                />
+                Partial
+              </span>
+              <span className={styles.legendItem}>
+                <span
+                  className={`${styles.legendDot} ${styles.legendDotRejected}`}
+                />
+                Not Achieved
+              </span>
+            </div>
+          </Card>
+
+          {/* Total Weakness */}
+          <Card className={styles.panel}>
+            <Text as="h3" className={styles.weaknessChartTitle}>
+              Total Weakness
+            </Text>
+
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart
+                data={weaknessData}
+                layout="vertical"
+                margin={{ top: 8, right: 16, left: 0, bottom: 8 }}
+                barSize={32}
+                barCategoryGap="30%"
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#E4E7EC"
+                  horizontal={false}
+                />
+                <XAxis
+                  type="number"
+                  domain={[0, weaknessMax]}
+                  ticks={weaknessTicks}
+                  tick={{ fontSize: 11, fill: "#667085" }}
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={76}
+                  tick={{ fontSize: 13, fill: "#667085", fontWeight: 700 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    fontSize: 12,
+                    borderRadius: 8,
+                    border: "1px solid #E4E7EC",
+                    background: "#fff",
+                  }}
+                  formatter={(v) => [v, "Not Achieved"]}
+                />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                  {weaknessData.map((_, i) => (
+                    <Cell
+                      key={i}
+                      fill={WEAKNESS_COLORS[i % WEAKNESS_COLORS.length]}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </div>
       </div>
     </div>
   );
