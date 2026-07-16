@@ -59,6 +59,20 @@ function StatusBadge({ status }) {
 export const Reports = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  useEffect(() => {
+    const handleBeforePrint = () => setIsPrinting(true);
+    const handleAfterPrint = () => setIsPrinting(false);
+    
+    window.addEventListener("beforeprint", handleBeforePrint);
+    window.addEventListener("afterprint", handleAfterPrint);
+    
+    return () => {
+      window.removeEventListener("beforeprint", handleBeforePrint);
+      window.removeEventListener("afterprint", handleAfterPrint);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -121,8 +135,8 @@ export const Reports = () => {
         <Card bordered elevation="elevation-1" className={styles.chartCard}>
           <CardHeader title="Monthly Issues - Open vs Closed" noDivider />
           <CardBody>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={data.issues_chart_data}>
+            {isPrinting ? (
+              <BarChart width={740} height={260} data={data.issues_chart_data}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 12, fill: "var(--text-secondary)" }} stroke="var(--border-main)" />
                 <YAxis
@@ -139,18 +153,41 @@ export const Reports = () => {
                   iconType="circle"
                   formatter={(value) => <span className={styles.legendLabel}>{value}</span>}
                 />
-                <Bar dataKey="Open" fill="#12B76A" radius={[4, 4, 0, 0]} barSize={26} />
-                <Bar dataKey="Closed" fill="#F04438" radius={[4, 4, 0, 0]} barSize={26} />
+                <Bar dataKey="Open" fill="#12B76A" radius={[4, 4, 0, 0]} barSize={26} isAnimationActive={false} />
+                <Bar dataKey="Closed" fill="#F04438" radius={[4, 4, 0, 0]} barSize={26} isAnimationActive={false} />
               </BarChart>
-            </ResponsiveContainer>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={data.issues_chart_data}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 12, fill: "var(--text-secondary)" }} stroke="var(--border-main)" />
+                  <YAxis
+                    tickFormatter={(v) => `${v}`}
+                    tick={{ fontSize: 12, fill: "var(--text-secondary)" }}
+                    stroke="var(--border-main)"
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "var(--bg-panel)", borderColor: "var(--border-glass)", color: "var(--text-primary)", borderRadius: "8px", backdropFilter: "blur(10px)" }}
+                    itemStyle={{ color: "var(--text-primary)" }}
+                  />
+                  <Legend
+                    verticalAlign="bottom"
+                    iconType="circle"
+                    formatter={(value) => <span className={styles.legendLabel}>{value}</span>}
+                  />
+                  <Bar dataKey="Open" fill="#12B76A" radius={[4, 4, 0, 0]} barSize={26} />
+                  <Bar dataKey="Closed" fill="#F04438" radius={[4, 4, 0, 0]} barSize={26} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardBody>
         </Card>
 
         <Card bordered elevation="elevation-1" className={styles.chartCard}>
           <CardHeader title="Monthly Score Trend by Process Area" noDivider />
           <CardBody>
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={data.score_trend_data}>
+            {isPrinting ? (
+              <LineChart width={740} height={260} data={data.score_trend_data}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--text-secondary)" }} stroke="var(--border-main)" />
                 <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: "var(--text-secondary)" }} stroke="var(--border-main)" />
@@ -165,11 +202,33 @@ export const Reports = () => {
                   iconType="plainline"
                   formatter={(value) => <span className={styles.legendLabel}>{value}</span>}
                 />
-                <Line type="monotone" dataKey="PR" stroke="#12B76A" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="PQA" stroke="#875BF7" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="VV" stroke="#F04478" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="PR" stroke="#12B76A" strokeWidth={2} dot={false} isAnimationActive={false} />
+                <Line type="monotone" dataKey="PQA" stroke="#875BF7" strokeWidth={2} dot={false} isAnimationActive={false} />
+                <Line type="monotone" dataKey="VV" stroke="#F04478" strokeWidth={2} dot={false} isAnimationActive={false} />
               </LineChart>
-            </ResponsiveContainer>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <LineChart data={data.score_trend_data}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--text-secondary)" }} stroke="var(--border-main)" />
+                  <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: "var(--text-secondary)" }} stroke="var(--border-main)" />
+                  <Tooltip
+                    formatter={(v) => `${v}%`}
+                    contentStyle={{ backgroundColor: "var(--bg-panel)", borderColor: "var(--border-glass)", color: "var(--text-primary)", borderRadius: "8px", backdropFilter: "blur(10px)" }}
+                    itemStyle={{ color: "var(--text-primary)" }}
+                  />
+                  <Legend
+                    verticalAlign="top"
+                    align="right"
+                    iconType="plainline"
+                    formatter={(value) => <span className={styles.legendLabel}>{value}</span>}
+                  />
+                  <Line type="monotone" dataKey="PR" stroke="#12B76A" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="PQA" stroke="#875BF7" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="VV" stroke="#F04478" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </CardBody>
         </Card>
       </div>
