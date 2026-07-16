@@ -124,26 +124,31 @@
 }
 
 .artifactCard {
-  background: var(--bg-input) !important;
-  border: 1px solid var(--border-main) !important;
-  border-radius: 14px !important;
-  padding: 20px 16px !important;
-  min-height: 76px;
+  background: rgba(135, 91, 247, 0.08) !important;
+  border: 1px solid rgba(135, 91, 247, 0.2) !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  min-height: 60px !important;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+  transition: all 0.2s ease !important;
 }
 
 .artifactCard:hover {
-  background: var(--glass-hover) !important;
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md) !important;
+  background: rgba(135, 91, 247, 0.15) !important;
   border-color: #875BF7 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(135, 91, 247, 0.15) !important;
 }
 
 .artifactLabel {
   font-size: 14px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
+  line-height: 1.4;
+  margin: 0;
 }
 
 @media (max-width: 1400px) {

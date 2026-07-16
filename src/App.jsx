@@ -35,11 +35,11 @@ function App() {
       case "Artifacts":
         return <Artifacts />;
       case "Peer Review":
-        return <ProcessArea key="peer-review" initialTab="peer-review" />;
+        return <ProcessArea key="peer-review" initialTab="peer-review" onTabChange={setActiveLabel} />;
       case "Software Quality Assurance":
-        return <ProcessArea key="sqa" initialTab="sqa" />;
+        return <ProcessArea key="sqa" initialTab="sqa" onTabChange={setActiveLabel} />;
       case "Validation and Verification":
-        return <ProcessArea key="vv" initialTab="vv" />;
+        return <ProcessArea key="vv" initialTab="vv" onTabChange={setActiveLabel} />;
       case "Reports":
         return <Reports />;
       default:

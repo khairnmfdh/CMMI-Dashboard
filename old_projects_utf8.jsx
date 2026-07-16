@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+﻿import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -11,7 +10,6 @@ import {
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
-  PolarRadiusAxis,
   Radar,
 } from "recharts";
 import {
@@ -24,6 +22,69 @@ import {
   ProgressBar,
 } from "@legion-ui-kit/react-core";
 import styles from "../Projects.module.css";
+
+const projects = [
+  {
+    id: "netmonk",
+    name: "NETMONK",
+    team: "Team User123",
+    status: "Active",
+    statusValue: "active",
+    level: "Level 2 - Managed",
+    levelValue: "level-2",
+    peerReview: 25,
+    pqa: 66,
+    vv: 20,
+    overall: 82,
+    detail: {
+      peerReview: { reviewsConducted: 6, openFindings: 4, closeFindings: 11, practicesMet: "PR.1.1, PR.1.2, PR.2.1" },
+      pqa: { auditsCompleted: 6, nonCompliancesFound: 6, processAdherence: "86%", lastAudit: "2026-06-10" },
+      vv: { verificationPassed: "36/40", validationPassed: "16/40", testCoverage: "76%" },
+    },
+  },
+  {
+    id: "padi-umkm",
+    name: "PaDi UMKM",
+    team: "Team User123",
+    status: "Active",
+    statusValue: "active",
+    level: "Level 3 - Defined",
+    levelValue: "level-3",
+    peerReview: 50,
+    pqa: 40,
+    vv: 78,
+    overall: 71,
+    detail: {
+      peerReview: { reviewsConducted: 8, openFindings: 2, closeFindings: 14, practicesMet: "PR.1.1, PR.1.2, PR.2.1" },
+      pqa: { auditsCompleted: 7, nonCompliancesFound: 3, processAdherence: "90%", lastAudit: "2026-06-12" },
+      vv: { verificationPassed: "38/40", validationPassed: "22/40", testCoverage: "84%" },
+    },
+  },
+  {
+    id: "legion-ai",
+    name: "Legion AI",
+    team: "Team User123",
+    status: "Inactive",
+    statusValue: "inactive",
+    level: "Level 4 - Quantitatively Managed",
+    levelValue: "level-4",
+    peerReview: 78,
+    pqa: 33,
+    vv: 38,
+    overall: 40,
+    detail: {
+      peerReview: { reviewsConducted: 9, openFindings: 1, closeFindings: 17, practicesMet: "PR.1.1, PR.1.2, PR.2.1" },
+      pqa: { auditsCompleted: 9, nonCompliancesFound: 1, processAdherence: "95%", lastAudit: "2026-06-14" },
+      vv: { verificationPassed: "39/40", validationPassed: "26/40", testCoverage: "91%" },
+    },
+  },
+];
+
+const chartData = [
+  { name: "Netmonk", "Peer Review": 13000, "Process QA": 11000, "V&V": 20000 },
+  { name: "PaDi UMKM", "Peer Review": 19500, "Process QA": 15500, "V&V": 9000 },
+  { name: "Legion AI", "Peer Review": 12500, "Process QA": 20000, "V&V": 8500 },
+];
 
 const statusOptions = [
   { label: "All Statuses", value: "all" },
@@ -50,50 +111,13 @@ export const Projects = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [level, setLevel] = useState("all");
-  
-  const [projects, setProjects] = useState([]);
-  const [chartData, setChartData] = useState([]);
-  const [selectedId, setSelectedId] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState(projects[0].id);
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const res = await axios.get("http://localhost:8080/api/v1/projects/cmmi-details");
-        const mappedProjects = res.data.data.projects.map((p) => ({
-          ...p,
-          statusValue: "active",
-          levelValue: "level-3",
-          peerReview: p.pr_target > 0 ? Math.round((p.pr_achieved / p.pr_target) * 100) : 0,
-          pqa: p.pqa_target > 0 ? Math.round((p.pqa_achieved / p.pqa_target) * 100) : 0,
-          vv: p.vv_target > 0 ? Math.round((p.vv_achieved / p.vv_target) * 100) : 0,
-          overall: p.overall_target > 0 ? Math.round((p.overall_achieved / p.overall_target) * 100) : 0,
-          prCount: p.pr_achieved,
-          pqaCount: p.pqa_achieved,
-          vvCount: p.vv_achieved,
-        }));
-        setProjects(mappedProjects);
-        setChartData(res.data.data.chart_data);
-        if (mappedProjects.length > 0) {
-          setSelectedId(mappedProjects[0].id);
-        }
-      } catch (err) {
-        console.error("Failed to fetch project details", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProjects();
-  }, []);
-
-  if (loading) return <div style={{ padding: 40, color: "white" }}>Loading Projects...</div>;
-  if (projects.length === 0) return <div style={{ padding: 40, color: "white" }}>No projects found.</div>;
-
-  const selected = projects.find((p) => p.id === selectedId) || projects[0];
+  const selected = projects.find((p) => p.id === selectedId);
   const radarData = [
-    { axis: "PR", value: selected.prCount },
-    { axis: "PQA", value: selected.pqaCount },
-    { axis: "VV", value: selected.vvCount },
+    { axis: "PR", value: selected.peerReview },
+    { axis: "PQA", value: selected.pqa },
+    { axis: "VV", value: selected.vv },
   ];
 
   const avg = (key) =>
@@ -112,22 +136,22 @@ export const Projects = () => {
         <Card className={styles.statCard} elevation="none">
           <Text as="p" color="white" className={styles.statLabel}>Total Projects</Text>
           <Text as="h2" color="white" className={styles.statValue}>{projects.length}</Text>
-          <Text as="p" color="white" className={styles.statSub}>Overall CMMI Score · Level 3</Text>
+          <Text as="p" color="white" className={styles.statSub}>Overall CMMI Score ┬╖ Level 3</Text>
         </Card>
         <Card className={styles.statCard} elevation="none">
           <Text as="p" color="white" className={styles.statLabel}>Avg Peer Review</Text>
           <Text as="h2" color="white" className={styles.statValue}>{avg("peerReview")}%</Text>
-          <Text as="p" color="white" className={styles.statSub}>Practices met</Text>
+          <Text as="p" color="white" className={styles.statSub}>39/50 practices met</Text>
         </Card>
         <Card className={styles.statCard} elevation="none">
           <Text as="p" color="white" className={styles.statLabel}>Avg PQA Score</Text>
           <Text as="h2" color="white" className={styles.statValue}>{avg("pqa")}%</Text>
-          <Text as="p" color="white" className={styles.statSub}>Practices met</Text>
+          <Text as="p" color="white" className={styles.statSub}>39/50 practices met</Text>
         </Card>
         <Card className={styles.statCard} elevation="none">
           <Text as="p" color="white" className={styles.statLabel}>Avg V&V Score</Text>
           <Text as="h2" color="white" className={styles.statValue}>{avg("vv")}%</Text>
-          <Text as="p" color="white" className={styles.statSub}>Practices met</Text>
+          <Text as="p" color="white" className={styles.statSub}>39/50 practices met</Text>
         </Card>
       </div>
 
@@ -160,15 +184,9 @@ export const Projects = () => {
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--text-secondary)" }} stroke="var(--border-main)" />
-              <YAxis tick={{ fontSize: 12, fill: "var(--text-secondary)" }} allowDecimals={false} stroke="var(--border-main)" />
-              <Tooltip
-                  contentStyle={{
-                    fontSize: 12, borderRadius: 8, border: "1px solid var(--border-glass)",
-                    background: "var(--bg-panel)", color: "var(--text-primary)", backdropFilter: "blur(10px)"
-                  }}
-                  itemStyle={{ color: "var(--text-primary)" }}
-              />
+              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+              <YAxis tickFormatter={(v) => `${v / 1000}k`} tick={{ fontSize: 12 }} />
+              <Tooltip />
               <Bar dataKey="Peer Review" fill="#F59E0B" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Process QA" fill="#F04438" radius={[4, 4, 0, 0]} />
               <Bar dataKey="V&V" fill="#12B76A" radius={[4, 4, 0, 0]} />
@@ -196,30 +214,8 @@ export const Projects = () => {
                     <Text as="p" color="tertiary" className={styles.projectTeam}>{p.team}</Text>
                   </div>
                   <div className={styles.projectBadges}>
-                    <span style={{
-                      backgroundColor: "rgba(16, 185, 129, 0.15)",
-                      color: "#059669",
-                      padding: "4px 10px",
-                      borderRadius: "99px",
-                      fontSize: "12px",
-                      fontWeight: "700",
-                      display: "inline-block",
-                      whiteSpace: "nowrap"
-                    }}>
-                      {p.status}
-                    </span>
-                    <span style={{
-                      backgroundColor: "rgba(59, 130, 246, 0.15)",
-                      color: "#2563eb",
-                      padding: "4px 10px",
-                      borderRadius: "99px",
-                      fontSize: "12px",
-                      fontWeight: "700",
-                      display: "inline-block",
-                      whiteSpace: "nowrap"
-                    }}>
-                      {p.level}
-                    </span>
+                    <Badge color={p.statusValue === "active" ? "success" : "secondary"} label={p.status} />
+                    <Badge color="secondary" label={p.level} />
                   </div>
                 </div>
 
@@ -241,13 +237,12 @@ export const Projects = () => {
                 <div className={styles.overallRow}>
                   <ProgressBar
                     value={p.overall}
+                    labelPosition="right"
                     className={styles.overallBar}
                     trackStyle={{ height: "6px" }}
                     indicatorStyle={{ background: overallColor(p.overall) }}
                   />
-                  <div className={styles.overallSuffix}>
-                    Overall
-                  </div>
+                  <Text as="span" color="tertiary" className={styles.overallSuffix}>Overall</Text>
                 </div>
               </Card>
             ))
@@ -258,10 +253,9 @@ export const Projects = () => {
           <CardHeader title={selected.name} description={selected.team} noDivider />
           <CardBody>
             <ResponsiveContainer width="100%" height={550}>
-              <RadarChart data={radarData}>
+              <RadarChart data={radarData} outerRadius="75%">
                 <PolarGrid />
-                <PolarAngleAxis dataKey="axis" tick={{ fontSize: 13, fontWeight: 600, fill: "var(--text-secondary)" }} />
-                <PolarRadiusAxis domain={[0, 7]} tick={false} axisLine={false} />
+                <PolarAngleAxis dataKey="axis" tick={{ fontSize: 13, fontWeight: 600 }} />
                 <Radar dataKey="value" stroke="#12B76A" fill="#12B76A" fillOpacity={0.35} />
               </RadarChart>
             </ResponsiveContainer>
@@ -271,18 +265,7 @@ export const Projects = () => {
 
       <div className={styles.detailRow}>
         <Card bordered elevation="elevation-1" className={styles.detailCard}>
-          <CardHeader title="Peer Review" noDivider iconRight={
-            <span style={{
-              backgroundColor: "rgba(139, 92, 246, 0.15)",
-              color: "#7c3aed",
-              padding: "4px 10px",
-              borderRadius: "99px",
-              fontSize: "12px",
-              fontWeight: "800",
-              display: "inline-block",
-              whiteSpace: "nowrap"
-            }}>{selected.peerReview}%</span>
-          } />
+          <CardHeader title="Peer Review" noDivider iconRight={<Badge color="primary" label={`${selected.peerReview}%`} />} />
           <CardBody>
             <div className={styles.progressGap}>
               <ProgressBar
@@ -302,18 +285,7 @@ export const Projects = () => {
         </Card>
 
         <Card bordered elevation="elevation-1" className={styles.detailCard}>
-          <CardHeader title="Process Quality Assurance" noDivider iconRight={
-            <span style={{
-              backgroundColor: "rgba(139, 92, 246, 0.15)",
-              color: "#7c3aed",
-              padding: "4px 10px",
-              borderRadius: "99px",
-              fontSize: "12px",
-              fontWeight: "800",
-              display: "inline-block",
-              whiteSpace: "nowrap"
-            }}>{selected.pqa}%</span>
-          } />
+          <CardHeader title="Process Quality Assurance" noDivider iconRight={<Badge color="primary" label={`${selected.pqa}%`} />} />
           <CardBody>
             <div className={styles.progressGap}>
               <ProgressBar
@@ -333,18 +305,7 @@ export const Projects = () => {
         </Card>
 
         <Card bordered elevation="elevation-1" className={styles.detailCard}>
-          <CardHeader title="Verification & Validation" noDivider iconRight={
-            <span style={{
-              backgroundColor: "rgba(139, 92, 246, 0.15)",
-              color: "#7c3aed",
-              padding: "4px 10px",
-              borderRadius: "99px",
-              fontSize: "12px",
-              fontWeight: "800",
-              display: "inline-block",
-              whiteSpace: "nowrap"
-            }}>{selected.vv}%</span>
-          } />
+          <CardHeader title="Verification & Validation" noDivider iconRight={<Badge color="primary" label={`${selected.vv}%`} />} />
           <CardBody>
             <div className={styles.progressGap}>
               <ProgressBar

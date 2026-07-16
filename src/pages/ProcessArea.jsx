@@ -27,9 +27,9 @@ import {
 import styles from "../ProcessArea.module.css";
 
 const tabs = [
-  { key: "peer-review", label: "Peer Review" },
-  { key: "sqa", label: "SQA" },
-  { key: "vv", label: "V&V" },
+  { key: "peer-review", label: "Peer Review", sidebarLabel: "Peer Review" },
+  { key: "sqa", label: "SQA", sidebarLabel: "Software Quality Assurance" },
+  { key: "vv", label: "V&V", sidebarLabel: "Validation and Verification" },
 ];
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -49,13 +49,36 @@ const monthOptions = [
 ];
 
 function StatusBadge({ status }) {
-  const color =
-    status === "Done" || status === "Closed"
-      ? "success"
-      : status === "In Progress" || status === "In progress"
-        ? "information"
-        : "secondary";
-  return <Badge color={color} label={status} />;
+  let bgColor, textColor;
+  if (status === "Done" || status === "Closed") {
+    bgColor = "rgba(16, 185, 129, 0.15)";
+    textColor = "#059669";
+  } else if (status === "In Progress" || status === "In progress") {
+    bgColor = "rgba(59, 130, 246, 0.15)";
+    textColor = "#2563eb";
+  } else {
+    bgColor = "rgba(107, 114, 128, 0.15)";
+    textColor = "#4b5563";
+  }
+
+  return (
+    <span
+      style={{
+        backgroundColor: bgColor,
+        color: textColor,
+        padding: "6px 12px",
+        borderRadius: "99px",
+        fontSize: "12px",
+        fontWeight: "700",
+        whiteSpace: "nowrap",
+        display: "inline-block",
+        lineHeight: "1",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
+      }}
+    >
+      {status}
+    </span>
+  );
 }
 
 function FlatTable({ rows }) {
@@ -120,10 +143,21 @@ function GroupedView({ rows, groupBy, openGroups, toggleGroup }) {
           toggleIcon="chevron-arrow"
           title={
             <div className={styles.accordionTitle}>
-              <span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {groupBy === "tribe" ? "👥" : "📁"} {key}
               </span>
-              <Badge color="secondary" label={`${groupRows.length} issues`} />
+              <span style={{
+                backgroundColor: "rgba(59, 130, 246, 0.15)",
+                color: "#2563eb",
+                padding: "4px 10px",
+                borderRadius: "99px",
+                fontSize: "12px",
+                fontWeight: "700",
+                display: "inline-block",
+                whiteSpace: "nowrap"
+              }}>
+                {groupRows.length} issues
+              </span>
             </div>
           }
         >
@@ -134,7 +168,7 @@ function GroupedView({ rows, groupBy, openGroups, toggleGroup }) {
   );
 }
 
-export const ProcessArea = ({ initialTab = "sqa" }) => {
+export const ProcessArea = ({ initialTab = "sqa", onTabChange }) => {
   const activeIndex = tabs.findIndex((t) => t.key === initialTab);
   const [tabIndex, setTabIndex] = useState(
     activeIndex === -1 ? 1 : activeIndex,
@@ -202,6 +236,9 @@ export const ProcessArea = ({ initialTab = "sqa" }) => {
     setMonth(currentMonthNum);
     setView("tribe");
     setOpenGroups(new Set());
+    if (onTabChange) {
+      onTabChange(tabs[index].sidebarLabel);
+    }
   };
 
   return (
@@ -306,13 +343,18 @@ export const ProcessArea = ({ initialTab = "sqa" }) => {
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--text-secondary)" }} stroke="var(--border-main)" />
                 <YAxis
                   tickFormatter={(v) => `${v}%`}
-                  tick={{ fontSize: 11 }}
+                  tick={{ fontSize: 11, fill: "var(--text-secondary)" }}
+                  stroke="var(--border-main)"
                   domain={[0, 100]}
                 />
-                <Tooltip formatter={(v) => `${v}%`} />
+                <Tooltip
+                  formatter={(v) => `${v}%`}
+                  contentStyle={{ backgroundColor: "var(--bg-panel)", borderColor: "var(--border-glass)", color: "var(--text-primary)", borderRadius: "8px", backdropFilter: "blur(10px)" }}
+                  itemStyle={{ color: "var(--text-primary)" }}
+                />
                 <Line
                   type="monotone"
                   dataKey="Detection"
@@ -342,9 +384,12 @@ export const ProcessArea = ({ initialTab = "sqa" }) => {
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--text-secondary)" }} stroke="var(--border-main)" />
+                <YAxis tick={{ fontSize: 11, fill: "var(--text-secondary)" }} stroke="var(--border-main)" />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "var(--bg-panel)", borderColor: "var(--border-glass)", color: "var(--text-primary)", borderRadius: "8px", backdropFilter: "blur(10px)" }}
+                  itemStyle={{ color: "var(--text-primary)" }}
+                />
                 <Bar
                   dataKey="Staging"
                   fill="#2970FF"

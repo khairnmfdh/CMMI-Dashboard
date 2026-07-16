@@ -3,7 +3,6 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: #fafafb;
   min-height: 100%;
 }
 
@@ -23,11 +22,14 @@
 .filterSelectWrapper {
   border-radius: 999px !important;
   padding: 8px 16px !important;
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-main) !important;
 }
 
 .filterSelectInput {
   font-size: 14px !important;
   font-weight: 600 !important;
+  color: var(--text-primary) !important;
   cursor: pointer;
 }
 
@@ -66,26 +68,48 @@
   gap: 16px;
 }
 
-.chartCard {
-  background: #fff;
+.chartCard, .tablePanel {
+  background: var(--glass-panel) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-glass) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chartCard:hover, .tablePanel:hover {
+  box-shadow: var(--shadow-md) !important;
 }
 
 .legendLabel {
   font-size: 12px;
-  color: #475467;
-}
-
-.tablePanel {
-  background: #fff;
+  color: var(--text-secondary);
 }
 
 .table {
   width: 100%;
+  background: transparent !important;
+}
+
+.table th {
+  background: rgba(0,0,0,0.02) !important;
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--border-main) !important;
+}
+
+.table td {
+  border-bottom: 1px solid var(--border-main) !important;
+  background: transparent !important;
+}
+
+.table tr:hover td {
+  background: var(--bg-input) !important;
 }
 
 .idCell {
   font-weight: 700;
-  color: #101828;
+  color: #2970ff;
 }
 
 .printHeader {

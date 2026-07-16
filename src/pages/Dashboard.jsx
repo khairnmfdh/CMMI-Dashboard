@@ -1,10 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Card,
   Text,
   ProgressBar,
-  Divider,
-  Select,
 } from "@legion-ui-kit/react-core";
 import {
   BarChart,
@@ -14,136 +13,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
   Legend,
 } from "recharts";
 import styles from "../Dashboard.module.css";
-
-// ─── Data ─────────────────────────────────
-
-const statCards = [
-  {
-    label: "Overall CMMI Score",
-    value: "93%",
-    sub: "Overall CMMI Score · Level 3",
-  },
-  { label: "Peer Review", value: "83%", sub: "15/18 practices met" },
-  { label: "Process QA", value: "94%", sub: "17/18 practices met" },
-  {
-    label: "Verification & Validation",
-    value: "100%",
-    sub: "21/21 practices met",
-  },
-];
-
-const processAreaOptions = [
-  { label: "All Process Area", value: "all" },
-  { label: "Peer Review", value: "peer-review" },
-  { label: "Process QA", value: "pqa" },
-  { label: "Verification & Validation", value: "vv" },
-];
-
-const AREA_DATA = {
-  all: {
-    productProcessArea: [
-      { label: "NETMONK", pct: 95 },
-      { label: "PaDi UMKM", pct: 95 },
-      { label: "Legion AI", pct: 89 },
-    ],
-    piidResults: [
-      { count: 53, label: "Achieved", tone: "achieved" },
-      { count: 3, label: "Partially Achieved", tone: "partial" },
-      { count: 1, label: "Not Achieved", tone: "notAchieved" },
-    ],
-  },
-  "peer-review": {
-    productProcessArea: [
-      { label: "NETMONK", pct: 83 },
-      { label: "PaDi UMKM", pct: 83 },
-      { label: "Legion AI", pct: 83 },
-    ],
-    piidResults: [
-      { count: 15, label: "Achieved", tone: "achieved" },
-      { count: 2, label: "Partially Achieved", tone: "partial" },
-      { count: 1, label: "Not Achieved", tone: "notAchieved" },
-    ],
-  },
-  pqa: {
-    productProcessArea: [
-      { label: "NETMONK", pct: 100 },
-      { label: "PaDi UMKM", pct: 100 },
-      { label: "Legion AI", pct: 83 },
-    ],
-    piidResults: [
-      { count: 17, label: "Achieved", tone: "achieved" },
-      { count: 1, label: "Partially Achieved", tone: "partial" },
-      { count: 0, label: "Not Achieved", tone: "notAchieved" },
-    ],
-  },
-  vv: {
-    productProcessArea: [
-      { label: "NETMONK", pct: 100 },
-      { label: "PaDi UMKM", pct: 100 },
-      { label: "Legion AI", pct: 100 },
-    ],
-    piidResults: [
-      { count: 21, label: "Achieved", tone: "achieved" },
-      { count: 0, label: "Partially Achieved", tone: "partial" },
-      { count: 0, label: "Not Achieved", tone: "notAchieved" },
-    ],
-  },
-};
-
-const recentActivities = [
-  { id: 1, time: "Today · 14:30", text: "Lead Appraiser verified PA - Peer Review for Netmonk project" },
-  { id: 2, time: "Today · 11:15", text: "Team member uploaded PIID evidence for PQA 1.1 (PaDi UMKM)" },
-  { id: 3, time: "Yesterday · 16:45", text: "Validation test coverage met 100% for Legion AI" },
-  { id: 4, time: "Yesterday · 10:20", text: "Assessment status updated to Partially Achieved for PR - Netmonk" },
-  { id: 5, time: "Jul 12 · 09:10", text: "System generated monthly CMMI compliance report" },
-  { id: 6, time: "Jul 11 · 15:00", text: "Review findings closed for Process QA - Legion AI" },
-];
-
-const WEAKNESS_COLORS = ["#4F46E5", "#6366F1", "#818CF8"];
-
-const WEAKNESS_DATA = {
-  all: [
-    { area: "PR", Netmonk: 2, "PaDi UMKM": 2, "Legion AI": 3 },
-    { area: "PQ", Netmonk: 2, "PaDi UMKM": 1, "Legion AI": 2 },
-    { area: "VV", Netmonk: 0, "PaDi UMKM": 1, "Legion AI": 0 },
-  ],
-  "peer-review": [
-    { area: "PR", Netmonk: 2, "PaDi UMKM": 2, "Legion AI": 3 },
-  ],
-  pqa: [
-    { area: "PQ", Netmonk: 2, "PaDi UMKM": 1, "Legion AI": 2 },
-  ],
-  vv: [
-    { area: "VV", Netmonk: 0, "PaDi UMKM": 1, "Legion AI": 0 },
-  ],
-};
-
-// ── Proportional project split ─────────────────────────────────────────────
-// Netmonk gets 1/2, PaDi UMKM gets 2/7, Legion AI gets 3/14 of any total.
-// Verified against the example: split(14) => [7, 4, 3].
-const PROJECT_NAMES = ["Netmonk", "PaDi UMKM", "Legion AI"];
-const PROJECT_WEIGHTS = [1 / 2, 2 / 7, 3 / 14];
-
-function splitByProject(total) {
-  const raw = PROJECT_WEIGHTS.map((w) => total * w);
-  const floors = raw.map(Math.floor);
-  const used = floors.reduce((a, b) => a + b, 0);
-  let remainder = total - used;
-
-  const order = raw
-    .map((r, i) => ({ i, frac: r - floors[i] }))
-    .sort((a, b) => b.frac - a.frac);
-
-  const result = [...floors];
-  for (let k = 0; k < remainder; k++) {
-    result[order[k].i] += 1;
-  }
-  return result; // [netmonkCount, padiCount, legionCount]
-}
 
 function niceMax(value) {
   if (value <= 10) return Math.ceil(value / 2) * 2 || 2;
@@ -151,38 +23,52 @@ function niceMax(value) {
   return Math.ceil(value / 10) * 10;
 }
 
-// ΓöÇΓöÇΓöÇ Dashboard ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-
 export const Dashboard = () => {
-  const [selectedArea, setSelectedArea] = useState("all");
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const { productProcessArea, piidResults } =
-    AREA_DATA[selectedArea] || AREA_DATA.all;
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/api/v1/dashboard/cmmi-summary");
+        setData(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch dashboard summary", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboard();
+  }, []);
 
-  const findCount = (tone) =>
-    piidResults.find((r) => r.tone === tone)?.count ?? 0;
+  if (loading) return <div style={{ padding: 40, color: "white" }}>Loading Dashboard...</div>;
+  if (!data) return <div style={{ padding: 40, color: "white" }}>Failed to load data.</div>;
 
-  const practiceStatusData = useMemo(() => {
-    const achieved = splitByProject(findCount("achieved"));
-    const partial = splitByProject(findCount("partial"));
-    const notAchieved = splitByProject(findCount("notAchieved"));
-
-    return PROJECT_NAMES.map((name, i) => ({
-      name,
-      Achieved: achieved[i],
-      Partial: partial[i],
-      NotAchieved: notAchieved[i],
-    }));
-  }, [piidResults]);
-
-  const weaknessData = WEAKNESS_DATA[selectedArea] || WEAKNESS_DATA.all;
+  const statCards = [
+    {
+      label: "Overall CMMI Score",
+      value: `${data.overall_score}%`,
+      sub: `Overall CMMI Score · Level ${data.overall_level}`,
+    },
+  ];
+  
+  if (data.process_areas) {
+    data.process_areas.forEach((pa) => {
+      statCards.push({
+        label: pa.name.split(" ")[0] === "PR" ? "Peer Review" : pa.name.split(" ")[0] === "PQA" ? "Process QA" : pa.name,
+        value: `${pa.score}%`,
+        sub: `${pa.met}/${pa.total} practices met`,
+      });
+    });
+  }
 
   const practiceMax = niceMax(
-    Math.max(...practiceStatusData.flatMap((d) => [d.Achieved, d.Partial, d.NotAchieved]), 1)
+    Math.max(...(data.practice_status_data || []).flatMap((d) => [d.Achieved, d.Partial, d.NotAchieved]), 1)
   );
+  
   const weaknessMax = niceMax(
     Math.max(
-      ...weaknessData.map((d) => (d.Netmonk || 0) + (d["PaDi UMKM"] || 0) + (d["Legion AI"] || 0)),
+      ...(data.weakness_data || []).map((d) => (d.Netmonk || 0) + (d["PaDi UMKM"] || 0) + (d["Legion AI"] || 0)),
       1
     )
   );
@@ -194,19 +80,7 @@ export const Dashboard = () => {
 
   return (
     <div className={styles.dashboard}>
-      {/* ΓöÇΓöÇ Filter row ΓöÇΓöÇ */}
-      <div className={styles.filterRow}>
-        <Select
-          options={processAreaOptions}
-          value={selectedArea}
-          onChange={(value) => setSelectedArea(value)}
-          className={styles.processSelect}
-          inputWrapperClassName={styles.processSelectInputWrapper}
-          inputClassName={styles.processSelectInput}
-        />
-      </div>
-
-      {/* ΓöÇΓöÇ Stat cards ΓöÇΓöÇ */}
+      {/* ─── Stat cards ─── */}
       <div className={styles.statsRow}>
         {statCards.map((stat) => (
           <Card key={stat.label} className={styles.statCard}>
@@ -223,7 +97,7 @@ export const Dashboard = () => {
         ))}
       </div>
 
-      {/* ΓöÇΓöÇ Mid grid ΓöÇΓöÇ */}
+      {/* ─── Mid grid ─── */}
       <div className={styles.midGrid}>
         <Card className={styles.panel}>
           <div className={styles.panelHeader}>
@@ -232,12 +106,12 @@ export const Dashboard = () => {
             </Text>
           </div>
           <div className={styles.progressList}>
-            {productProcessArea.map((item) => (
-              <div key={item.label} className={styles.progressItem}>
+            {data.process_areas && data.process_areas.map((item) => (
+              <div key={item.name} className={styles.progressItem}>
                 <Text as="p" className={styles.progressLabel}>
-                  {item.label}
+                  {item.name}
                 </Text>
-                <ProgressBar value={item.pct} color="warning" />
+                <ProgressBar value={item.score} color="warning" />
               </div>
             ))}
           </div>
@@ -246,27 +120,34 @@ export const Dashboard = () => {
         <Card className={styles.panel}>
           <div className={styles.panelHeader}>
             <Text as="h3" variant="heading">
-              PIID Result
+              PIID Result Breakdown
             </Text>
           </div>
           <div className={styles.piidList}>
-            {piidResults.map((item) => (
-              <div key={item.label} className={styles.piidItem}>
-                <span
-                  className={`${styles.piidBadge} ${styles[`piidBadge_${item.tone}`]}`}
-                >
-                  {item.count}
+             {/* Show summary of practice status data here instead of hardcoded PIID result tone */}
+             <div className={styles.piidItem}>
+                <span className={`${styles.piidBadge} ${styles.piidBadge_achieved}`}>
+                  {(data.practice_status_data || []).reduce((acc, curr) => acc + curr.Achieved, 0)}
                 </span>
-                <Text as="span" className={styles.piidLabel}>
-                  {item.label}
-                </Text>
-              </div>
-            ))}
+                <Text as="span" className={styles.piidLabel}>Achieved</Text>
+             </div>
+             <div className={styles.piidItem}>
+                <span className={`${styles.piidBadge} ${styles.piidBadge_partial}`}>
+                  {(data.practice_status_data || []).reduce((acc, curr) => acc + curr.Partial, 0)}
+                </span>
+                <Text as="span" className={styles.piidLabel}>Partially Achieved</Text>
+             </div>
+             <div className={styles.piidItem}>
+                <span className={`${styles.piidBadge} ${styles.piidBadge_notAchieved}`}>
+                  {(data.practice_status_data || []).reduce((acc, curr) => acc + curr.NotAchieved, 0)}
+                </span>
+                <Text as="span" className={styles.piidLabel}>Not Achieved</Text>
+             </div>
           </div>
         </Card>
       </div>
 
-      {/* ΓöÇΓöÇ Bottom grid ΓöÇΓöÇ */}
+      {/* ─── Bottom grid ─── */}
       <div className={styles.bottomGrid}>
         <Card className={styles.panel}>
           <div className={styles.panelHeader}>
@@ -276,11 +157,11 @@ export const Dashboard = () => {
           </div>
 
           <div className={styles.timeline}>
-            {recentActivities.map((activity, i) => (
-              <div key={activity.id} className={styles.timelineItem}>
+            {data.recent_activities && data.recent_activities.map((activity, i) => (
+              <div key={i} className={styles.timelineItem}>
                 <div className={styles.timelineDotCol}>
                   <span className={styles.timelineDot} />
-                  {i < recentActivities.length - 1 && (
+                  {i < data.recent_activities.length - 1 && (
                     <span className={styles.timelineLine} />
                   )}
                 </div>
@@ -289,7 +170,7 @@ export const Dashboard = () => {
                     {activity.time}
                   </Text>
                   <Text as="p" className={styles.timelineText}>
-                    {activity.text}
+                    {activity.title || activity.description}
                   </Text>
                 </div>
               </div>
@@ -298,7 +179,6 @@ export const Dashboard = () => {
         </Card>
 
         <div className={styles.bottomRightCol}>
-          {/* Practice Status Distribution ΓÇö now derived from PIID split per project */}
           <Card className={styles.panel}>
             <div className={styles.panelHeader}>
               <Text as="h3" variant="heading">
@@ -308,123 +188,54 @@ export const Dashboard = () => {
 
             <ResponsiveContainer width="100%" height={285}>
               <BarChart
-                data={practiceStatusData}
+                data={data.practice_status_data}
                 barSize={16}
                 barGap={4}
                 margin={{ top: 9, right: 0, left: -20, bottom: 4 }}
               >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#E4E7EC"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 12, fill: "#667085", fontWeight: 600 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  domain={[0, practiceMax]}
-                  tick={{ fontSize: 11, fill: "#667085" }}
-                  axisLine={false}
-                  tickLine={false}
-                  allowDecimals={false}
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E4E7EC" vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: "var(--text-secondary)", fontWeight: 600 }} axisLine={false} tickLine={false} stroke="var(--border-main)" />
+                <YAxis domain={[0, practiceMax]} tick={{ fontSize: 11, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} allowDecimals={false} stroke="var(--border-main)" />
                 <Tooltip
                   contentStyle={{
-                    fontSize: 12,
-                    borderRadius: 8,
-                    border: "1px solid #E4E7EC",
-                    background: "#fff",
+                    fontSize: 12, borderRadius: 8, border: "1px solid var(--border-glass)",
+                    background: "var(--bg-panel)", color: "var(--text-primary)", backdropFilter: "blur(10px)"
                   }}
+                  itemStyle={{ color: "var(--text-primary)" }}
                 />
-                <Bar
-                  dataKey="Achieved"
-                  name="Achieved"
-                  fill="#12B76A"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="Partial"
-                  name="Partial"
-                  fill="#F59E0B"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="NotAchieved"
-                  name="Not Achieved"
-                  fill="#F04438"
-                  radius={[4, 4, 0, 0]}
-                />
+                <Bar dataKey="Achieved" name="Achieved" fill="#12B76A" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Partial" name="Partial" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="NotAchieved" name="Not Achieved" fill="#F04438" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-
             <div className={styles.chartLegend}>
-              <span className={styles.legendItem}>
-                <span
-                  className={`${styles.legendDot} ${styles.legendDotApproved}`}
-                />
-                Achieved
-              </span>
-              <span className={styles.legendItem}>
-                <span
-                  className={`${styles.legendDot} ${styles.legendDotPending}`}
-                />
-                Partial
-              </span>
-              <span className={styles.legendItem}>
-                <span
-                  className={`${styles.legendDot} ${styles.legendDotRejected}`}
-                />
-                Not Achieved
-              </span>
+              <span className={styles.legendItem}><span className={`${styles.legendDot} ${styles.legendDotApproved}`} />Achieved</span>
+              <span className={styles.legendItem}><span className={`${styles.legendDot} ${styles.legendDotPending}`} />Partial</span>
+              <span className={styles.legendItem}><span className={`${styles.legendDot} ${styles.legendDotRejected}`} />Not Achieved</span>
             </div>
           </Card>
 
-          {/* Total Weakness ΓÇö Not Achieved count split per project, filter-reactive */}
           <Card className={styles.panel}>
             <Text as="h3" className={styles.weaknessChartTitle}>
               Total Weakness
             </Text>
-
             <ResponsiveContainer width="100%" height={280}>
               <BarChart
-                data={weaknessData}
+                data={data.weakness_data}
                 margin={{ top: 8, right: 16, left: 0, bottom: 8 }}
                 barSize={32}
               >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#E4E7EC"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="area"
-                  tick={{ fontSize: 13, fill: "#667085", fontWeight: 700 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  domain={[0, weaknessMax]}
-                  ticks={weaknessTicks}
-                  tick={{ fontSize: 11, fill: "#667085" }}
-                  axisLine={false}
-                  tickLine={false}
-                  allowDecimals={false}
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E4E7EC" vertical={false} />
+                <XAxis dataKey="area" tick={{ fontSize: 13, fill: "var(--text-secondary)", fontWeight: 700 }} axisLine={false} tickLine={false} stroke="var(--border-main)" />
+                <YAxis domain={[0, weaknessMax]} ticks={weaknessTicks} tick={{ fontSize: 11, fill: "var(--text-secondary)" }} axisLine={false} tickLine={false} allowDecimals={false} stroke="var(--border-main)" />
                 <Tooltip
                   contentStyle={{
-                    fontSize: 12,
-                    borderRadius: 8,
-                    border: "1px solid #E4E7EC",
-                    background: "#fff",
+                    fontSize: 12, borderRadius: 8, border: "1px solid var(--border-glass)",
+                    background: "var(--bg-panel)", color: "var(--text-primary)", backdropFilter: "blur(10px)"
                   }}
+                  itemStyle={{ color: "var(--text-primary)" }}
                 />
-                <Legend 
-                  wrapperStyle={{ fontSize: 12, color: "#667085" }} 
-                  iconType="circle"
-                />
+                <Legend wrapperStyle={{ fontSize: 12, color: "var(--text-secondary)" }} iconType="circle" />
                 <Bar dataKey="Netmonk" stackId="a" fill="#1D4ED8" />
                 <Bar dataKey="PaDi UMKM" stackId="a" fill="#F59E0B" />
                 <Bar dataKey="Legion AI" stackId="a" fill="#12B76A" />

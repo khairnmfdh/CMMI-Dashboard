@@ -33,6 +33,7 @@
   color: var(--text-primary) !important;
   font-weight: 700;
   box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-glass);
 }
 
 .sectionTitleRow {
@@ -78,16 +79,18 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-glass) !important;
-  padding: 16px !important;
+  border-radius: 16px !important;
+  padding: 20px 16px !important;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   box-shadow: var(--shadow-sm) !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .kpiCard:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  border-color: #875BF7 !important;
   box-shadow: var(--shadow-md) !important;
 }
 
@@ -122,23 +125,22 @@
 .chartsRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
+  margin-top: 8px;
 }
 
-.chartCard {
+.chartCard, .listCard {
   background: var(--glass-panel) !important;
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-glass) !important;
+  border-radius: 16px !important;
   box-shadow: var(--shadow-sm) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.listCard {
-  background: var(--glass-panel) !important;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border-glass) !important;
-  box-shadow: var(--shadow-sm) !important;
+.chartCard:hover, .listCard:hover {
+  box-shadow: var(--shadow-md) !important;
 }
 
 .viewToggleRow {
@@ -151,15 +153,32 @@
 .accordionTitle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 12px;
   width: 100%;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .table {
   width: 100%;
+  background: transparent !important;
+}
+
+.table th {
+  background: rgba(0,0,0,0.02) !important;
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--border-main) !important;
+}
+
+.table td {
+  border-bottom: 1px solid var(--border-main) !important;
+  background: transparent !important;
+}
+
+.table tr:hover td {
+  background: var(--bg-input) !important;
 }
 
 .idCell {
