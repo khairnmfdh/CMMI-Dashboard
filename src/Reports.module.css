@@ -82,6 +82,12 @@
   box-shadow: var(--shadow-md) !important;
 }
 
+/* Force Legion UI subcomponents to be transparent inside our custom panels */
+.chartCard > *,
+.tablePanel > * {
+  background: transparent !important;
+}
+
 .legendLabel {
   font-size: 12px;
   color: var(--text-secondary);

@@ -199,3 +199,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Force Legion UI subcomponents to be transparent inside our custom panels */
+.kpiCard > *,
+.chartCard > *,
+.listCard > * {
+  background: transparent !important;
+}

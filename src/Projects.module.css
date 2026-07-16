@@ -236,3 +236,19 @@
   font-weight: 600;
   color: var(--text-primary);
 }
+
+/* Force Legion UI CardHeader and CardBody to be transparent inside our custom panels */
+.radarPanel > *,
+.detailCard > *,
+.topChartPanel > * {
+  background: transparent !important;
+}
+
+.topChartPanel {
+  background: var(--glass-panel) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-sm) !important;
+  margin-bottom: 16px;
+}

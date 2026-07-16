@@ -125,6 +125,11 @@
   box-shadow: 0 15px 30px -5px rgba(0,0,0,0.1) !important;
 }
 
+/* Force Legion UI subcomponents to be transparent inside .panel */
+.panel > * {
+  background: transparent !important;
+}
+
 .panelHeader {
   display: flex;
   justify-content: space-between;
