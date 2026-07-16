@@ -138,8 +138,24 @@
     top: 0;
     left: 0;
     width: 100%;
-    padding: 0;
-    background: #fff;
+    padding: 20px !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .printHeader {
+    display: block !important;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  
+  .printHeader h2 {
+    color: #000 !important;
+    font-size: 24px;
+  }
+  
+  .printHeader p {
+    color: #555 !important;
   }
 
   /* Hide the filter row and download button — not needed in the printed report */
@@ -151,21 +167,34 @@
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     break-inside: avoid;
+    /* make sure stat cards have contrast in print */
+    background: #875bf7 !important;
+    color: white !important;
   }
 
   .chartCard,
   .tablePanel {
     break-inside: avoid;
     box-shadow: none !important;
-    border: 1px solid #e4e7ec !important;
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    margin-bottom: 24px !important;
+    width: 100% !important;
   }
 
   .chartsRow {
-    display: block;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px !important;
   }
 
   .chartCard {
-    margin-bottom: 16px;
-    margin-left: 20px;
+    margin-left: 0 !important;
+  }
+  
+  /* Force dark text for print */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
