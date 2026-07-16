@@ -1425,3 +1425,11 @@ html, body, #root {
   --sidebar-sizing-height-menu: 52px;
   --sidebar-sizing-height-sub-menu: 52px
 }
+/* Dark theme global overrides for Legion UI components */
+:root {
+  --accordion-background-color-closed-item: var(--glass-panel) !important;
+  --accordion-background-color-opened-item: var(--glass-panel) !important;
+  --accordion-background-color-disabled-item: transparent !important;
+  --card-background-color-container: var(--glass-panel) !important;
+  --table-background-color-body: transparent !important;
+}

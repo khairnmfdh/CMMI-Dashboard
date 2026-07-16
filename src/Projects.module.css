@@ -240,6 +240,7 @@
 /* Force Legion UI CardHeader and CardBody to be transparent inside our custom panels */
 .radarPanel > *,
 .detailCard > *,
+.panel > *,
 .topChartPanel > * {
   background: transparent !important;
 }
