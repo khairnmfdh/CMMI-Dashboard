@@ -45,11 +45,13 @@ Karena proyek ini memiliki banyak pilar, kamu harus menjalankannya secara **beru
 ### Langkah 1: Kloning Repositori (*Git Clone*)
 Pastikan kamu memiliki akses ke repositori GitHub Telkom. Buat satu folder utama (misal: `dashboard_cmmi`), lalu lakukan kloning untuk semua pilar proyek:
 ```bash
-# Contoh (Ganti dengan URL Repo yang sebenarnya)
+# Lakukan kloning untuk semua pilar proyek:
 git clone https://github.com/khairnmfdh/CMMI-Dashboard.git fe_dashboard/CMMI-Dashboard
-git clone [URL_REPO_BACKEND] be_dashboard
-git clone [URL_REPO_GITLAB_SCRAPER] gitlab/be-dashboard-cmmi
+git clone https://github.com/FarhanFawwaz/be_dashboard.git be_dashboard
+git clone https://gitlab.playcourt.id/live.comfarhan.fawwaz/be-dashboard-cmmi.git gitlab/be-dashboard-cmmi
 ```
+
+*(Catatan: Untuk detail teknis mengenai cara kerja scraper dan konfigurasi Python, silakan baca `README.md` yang terdapat di dalam folder `gitlab/be-dashboard-cmmi` setelah melakukan kloning).*
 
 ### Langkah 2: Menyalakan Basis Data & Metabase (via Docker)
 Sistem ini menggunakan dua instans basis data PostgreSQL yang berbeda. **Pastikan Docker Desktop sudah menyala di komputermu.**
