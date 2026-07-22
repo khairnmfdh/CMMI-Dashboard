@@ -46,8 +46,8 @@ Karena proyek ini memiliki banyak pilar, kamu harus menjalankannya secara **beru
 Pastikan kamu memiliki akses ke repositori GitHub Telkom. Buat satu folder utama (misal: `dashboard_cmmi`), lalu lakukan kloning untuk semua pilar proyek:
 ```bash
 # Lakukan kloning untuk semua pilar proyek:
-git clone https://github.com/khairnmfdh/CMMI-Dashboard.git fe_dashboard/CMMI-Dashboard
-git clone https://github.com/FarhanFawwaz/be_dashboard.git be_dashboard
+git clone -b feat/api-integration https://github.com/khairnmfdh/CMMI-Dashboard.git fe_dashboard/CMMI-Dashboard
+git clone -b api-integration https://github.com/FarhanFawwaz/be_dashboard.git be_dashboard
 git clone https://gitlab.playcourt.id/live.comfarhan.fawwaz/be-dashboard-cmmi.git gitlab/be-dashboard-cmmi
 ```
 
