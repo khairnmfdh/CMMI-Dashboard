@@ -21,6 +21,7 @@ export const Artifacts = () => {
   // API State
   const [projectsData, setProjectsData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const toggleTool = (key) => {
     setActiveTools((prev) => {
@@ -37,6 +38,7 @@ export const Artifacts = () => {
         setProjectsData(res.data.data);
       } catch (err) {
         console.error("Failed to fetch artifacts", err);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -45,7 +47,8 @@ export const Artifacts = () => {
   }, []);
 
   if (loading) return <div style={{ padding: 40, color: "white" }}>Loading Artifacts...</div>;
-  if (!projectsData.length) return <div style={{ padding: 40, color: "white" }}>Failed to load data.</div>;
+  if (error) return <div style={{ padding: 40, color: "white" }}>Failed to load data. Please check your backend connection.</div>;
+  if (!projectsData.length) return <div style={{ padding: 40, color: "white" }}>No artifacts found. (Radar Database is empty).</div>;
 
   // Generate project options dynamically from fetched data
   const projectOptions = [
